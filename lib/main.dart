@@ -4,6 +4,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'providers/auth_provider.dart';
+import 'providers/theme_provider.dart';
+import 'widgets/global_app_bar.dart';
 
 void main() async {
   // Load environment variables from .env file
@@ -22,6 +24,7 @@ class POSApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
+    final themeMode = ref.watch(themeProvider);
 
     return MaterialApp(
       title: 'POS System',
@@ -51,8 +54,20 @@ class POSApp extends ConsumerWidget {
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
+        cardTheme: CardThemeData(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          filled: true,
+        ),
       ),
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       initialRoute: authState.isAuthenticated ? '/home' : '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
@@ -67,6 +82,12 @@ class POSApp extends ConsumerWidget {
           return MaterialPageRoute(builder: (_) => const HomeScreen());
         }
         return null;
+      },
+      builder: (context, child) {
+        return Scaffold(
+          appBar: const GlobalAppBar(),
+          body: child!,
+        );
       },
     );
   }

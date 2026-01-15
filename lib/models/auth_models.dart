@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'business_models.dart';
 
 part 'auth_models.freezed.dart';
 part 'auth_models.g.dart';
@@ -18,8 +19,8 @@ class RequestOTPRequest with _$RequestOTPRequest {
 @freezed
 class VerifyOTPRequest with _$VerifyOTPRequest {
   const factory VerifyOTPRequest({
-    required String otpToken, // JWT token from RequestOTP response
-    required String otpCode, // 6-digit code submitted by user
+    @JsonKey(name: 'otp_token') required String otpToken, // JWT token from RequestOTP response
+    @JsonKey(name: 'otp_code') required String otpCode, // 6-digit code submitted by user
   }) = _VerifyOTPRequest;
 
   factory VerifyOTPRequest.fromJson(Map<String, dynamic> json) =>
@@ -63,12 +64,27 @@ class CreateUserRequest with _$CreateUserRequest {
       _$CreateUserRequestFromJson(json);
 }
 
+@freezed
+class SignUpRequest with _$SignUpRequest {
+  const factory SignUpRequest({
+    @JsonKey(name: 'full_name') required String fullName,
+    @JsonKey(name: 'phone_number') String? phoneNumber,
+    @JsonKey(name: 'email') String? email,
+    @JsonKey(name: 'password') String? password,
+    @JsonKey(name: 'business_name') required String businessName,
+    @JsonKey(name: 'blueprint_id') String? blueprintId,
+  }) = _SignUpRequest;
+
+  factory SignUpRequest.fromJson(Map<String, dynamic> json) =>
+      _$SignUpRequestFromJson(json);
+}
+
 // Response Models
 @freezed
 class RequestOTPResponse with _$RequestOTPResponse {
   const factory RequestOTPResponse({
-    required String otpToken, // Stateless JWT containing hashed code
-    required DateTime expiresAt,
+    @JsonKey(name: 'otp_token') required String otpToken, // Stateless JWT containing hashed code
+    @JsonKey(name: 'expires_at') required DateTime expiresAt,
     required String message,
   }) = _RequestOTPResponse;
 
@@ -80,14 +96,14 @@ class RequestOTPResponse with _$RequestOTPResponse {
 class LoginResponse with _$LoginResponse {
   const factory LoginResponse({
     required String token,
-    String? csrfToken, // Only for web clients
-    required String userId,
-    required String userType, // "admin" or "staff"
-    String? businessId, // For staff type
-    String? storeCode, // For staff type
+    @JsonKey(name: 'csrf_token') String? csrfToken, // Only for web clients
+    @JsonKey(name: 'user_id') required String userId,
+    @JsonKey(name: 'user_type') required String userType, // "admin" or "staff"
+    @JsonKey(name: 'business_id') String? businessId, // For staff type
+    @JsonKey(name: 'store_code') String? storeCode, // For staff type
     String? role, // For staff type
     List<BusinessRole>? businesses, // For admin type
-    required DateTime expiresAt,
+    @JsonKey(name: 'expires_at') required DateTime expiresAt,
   }) = _LoginResponse;
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) =>
@@ -97,9 +113,8 @@ class LoginResponse with _$LoginResponse {
 @freezed
 class BusinessRole with _$BusinessRole {
   const factory BusinessRole({
-    required String businessId,
-    required String businessName,
-    required String storeCode,
+    @JsonKey(name: 'business_id') required String businessId,
+    @JsonKey(name: 'store_code') required String storeCode,
     required String role,
   }) = _BusinessRole;
 
@@ -120,4 +135,15 @@ class User with _$User {
 
   factory User.fromJson(Map<String, dynamic> json) =>
       _$UserFromJson(json);
+}
+
+@freezed
+class SignUpResponse with _$SignUpResponse {
+  const factory SignUpResponse({
+    required User user,
+    required Business business,
+  }) = _SignUpResponse;
+
+  factory SignUpResponse.fromJson(Map<String, dynamic> json) =>
+      _$SignUpResponseFromJson(json);
 }

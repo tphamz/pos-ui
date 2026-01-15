@@ -23,13 +23,18 @@ Business _$BusinessFromJson(Map<String, dynamic> json) {
 mixin _$Business {
   String get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
+  @JsonKey(name: 'store_code')
   String? get storeCode => throw _privateConstructorUsedError;
+  @JsonKey(name: 'tax_number')
   String? get taxNumber => throw _privateConstructorUsedError;
   String? get currency => throw _privateConstructorUsedError;
   String? get timezone => throw _privateConstructorUsedError;
   String? get status => throw _privateConstructorUsedError;
+  @JsonKey(name: 'blueprint_id')
   String? get blueprintId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
   DateTime? get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'updated_at')
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this Business to a JSON map.
@@ -50,14 +55,14 @@ abstract class $BusinessCopyWith<$Res> {
   $Res call({
     String id,
     String name,
-    String? storeCode,
-    String? taxNumber,
+    @JsonKey(name: 'store_code') String? storeCode,
+    @JsonKey(name: 'tax_number') String? taxNumber,
     String? currency,
     String? timezone,
     String? status,
-    String? blueprintId,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    @JsonKey(name: 'blueprint_id') String? blueprintId,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
   });
 }
 
@@ -147,14 +152,14 @@ abstract class _$$BusinessImplCopyWith<$Res>
   $Res call({
     String id,
     String name,
-    String? storeCode,
-    String? taxNumber,
+    @JsonKey(name: 'store_code') String? storeCode,
+    @JsonKey(name: 'tax_number') String? taxNumber,
     String? currency,
     String? timezone,
     String? status,
-    String? blueprintId,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    @JsonKey(name: 'blueprint_id') String? blueprintId,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
   });
 }
 
@@ -236,14 +241,14 @@ class _$BusinessImpl implements _Business {
   const _$BusinessImpl({
     required this.id,
     required this.name,
-    this.storeCode,
-    this.taxNumber,
+    @JsonKey(name: 'store_code') this.storeCode,
+    @JsonKey(name: 'tax_number') this.taxNumber,
     this.currency,
     this.timezone,
     this.status,
-    this.blueprintId,
-    this.createdAt,
-    this.updatedAt,
+    @JsonKey(name: 'blueprint_id') this.blueprintId,
+    @JsonKey(name: 'created_at') this.createdAt,
+    @JsonKey(name: 'updated_at') this.updatedAt,
   });
 
   factory _$BusinessImpl.fromJson(Map<String, dynamic> json) =>
@@ -254,8 +259,10 @@ class _$BusinessImpl implements _Business {
   @override
   final String name;
   @override
+  @JsonKey(name: 'store_code')
   final String? storeCode;
   @override
+  @JsonKey(name: 'tax_number')
   final String? taxNumber;
   @override
   final String? currency;
@@ -264,10 +271,13 @@ class _$BusinessImpl implements _Business {
   @override
   final String? status;
   @override
+  @JsonKey(name: 'blueprint_id')
   final String? blueprintId;
   @override
+  @JsonKey(name: 'created_at')
   final DateTime? createdAt;
   @override
+  @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
 
   @override
@@ -333,14 +343,14 @@ abstract class _Business implements Business {
   const factory _Business({
     required final String id,
     required final String name,
-    final String? storeCode,
-    final String? taxNumber,
+    @JsonKey(name: 'store_code') final String? storeCode,
+    @JsonKey(name: 'tax_number') final String? taxNumber,
     final String? currency,
     final String? timezone,
     final String? status,
-    final String? blueprintId,
-    final DateTime? createdAt,
-    final DateTime? updatedAt,
+    @JsonKey(name: 'blueprint_id') final String? blueprintId,
+    @JsonKey(name: 'created_at') final DateTime? createdAt,
+    @JsonKey(name: 'updated_at') final DateTime? updatedAt,
   }) = _$BusinessImpl;
 
   factory _Business.fromJson(Map<String, dynamic> json) =
@@ -351,8 +361,10 @@ abstract class _Business implements Business {
   @override
   String get name;
   @override
+  @JsonKey(name: 'store_code')
   String? get storeCode;
   @override
+  @JsonKey(name: 'tax_number')
   String? get taxNumber;
   @override
   String? get currency;
@@ -361,10 +373,13 @@ abstract class _Business implements Business {
   @override
   String? get status;
   @override
+  @JsonKey(name: 'blueprint_id')
   String? get blueprintId;
   @override
+  @JsonKey(name: 'created_at')
   DateTime? get createdAt;
   @override
+  @JsonKey(name: 'updated_at')
   DateTime? get updatedAt;
 
   /// Create a copy of Business

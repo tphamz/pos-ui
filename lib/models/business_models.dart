@@ -8,14 +8,14 @@ class Business with _$Business {
   const factory Business({
     required String id,
     required String name,
-    String? storeCode,
-    String? taxNumber,
+    @JsonKey(name: 'store_code') String? storeCode,
+    @JsonKey(name: 'tax_number') String? taxNumber,
     String? currency,
     String? timezone,
     String? status,
-    String? blueprintId,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    @JsonKey(name: 'blueprint_id') String? blueprintId,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
   }) = _Business;
 
   factory Business.fromJson(Map<String, dynamic> json) =>

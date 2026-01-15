@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
-import '../models/auth_models.dart';
 import '../utils/validation.dart';
 import 'otp_verification_screen.dart';
 import 'signup_screen.dart';
@@ -33,9 +32,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final contact = _contactController.text.trim();
-    final storeCode = _storeCodeController.text.trim().isEmpty
-        ? null
-        : _storeCodeController.text.trim();
+    final storeCode = _storeCodeController.text.trim();
 
     try {
       final otpToken = await ref.read(authProvider.notifier).requestOTP(
@@ -70,9 +67,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final contact = _contactController.text.trim();
     final password = _passwordController.text;
-    final storeCode = _storeCodeController.text.trim().isEmpty
-        ? null
-        : _storeCodeController.text.trim();
+    final storeCode = _storeCodeController.text.trim();
 
     try {
       await ref.read(authProvider.notifier).login(contact, password, storeCode: storeCode);
@@ -153,19 +148,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Store Code field (optional)
+                  // Store Code field (required)
                   TextFormField(
                     controller: _storeCodeController,
                     decoration: const InputDecoration(
-                      labelText: 'Store Code (Optional)',
+                      labelText: 'Store Code *',
                       hintText: 'store-code',
                       prefixIcon: Icon(Icons.store_outlined),
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
-                      if (value != null &&
-                          value.isNotEmpty &&
-                          !ValidationUtils.isValidStoreCode(value)) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your store code';
+                      }
+                      if (!ValidationUtils.isValidStoreCode(value)) {
                         return 'Invalid store code format';
                       }
                       return null;

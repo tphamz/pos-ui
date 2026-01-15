@@ -23,15 +23,15 @@ Map<String, dynamic> _$$RequestOTPRequestImplToJson(
 _$VerifyOTPRequestImpl _$$VerifyOTPRequestImplFromJson(
   Map<String, dynamic> json,
 ) => _$VerifyOTPRequestImpl(
-  otpToken: json['otpToken'] as String,
-  otpCode: json['otpCode'] as String,
+  otpToken: json['otp_token'] as String,
+  otpCode: json['otp_code'] as String,
 );
 
 Map<String, dynamic> _$$VerifyOTPRequestImplToJson(
   _$VerifyOTPRequestImpl instance,
 ) => <String, dynamic>{
-  'otpToken': instance.otpToken,
-  'otpCode': instance.otpCode,
+  'otp_token': instance.otpToken,
+  'otp_code': instance.otpCode,
 };
 
 _$LoginRequestImpl _$$LoginRequestImplFromJson(Map<String, dynamic> json) =>
@@ -82,63 +82,81 @@ Map<String, dynamic> _$$CreateUserRequestImplToJson(
   'password': instance.password,
 };
 
+_$SignUpRequestImpl _$$SignUpRequestImplFromJson(Map<String, dynamic> json) =>
+    _$SignUpRequestImpl(
+      fullName: json['full_name'] as String,
+      phoneNumber: json['phone_number'] as String?,
+      email: json['email'] as String?,
+      password: json['password'] as String?,
+      businessName: json['business_name'] as String,
+      blueprintId: json['blueprint_id'] as String?,
+    );
+
+Map<String, dynamic> _$$SignUpRequestImplToJson(_$SignUpRequestImpl instance) =>
+    <String, dynamic>{
+      'full_name': instance.fullName,
+      'phone_number': instance.phoneNumber,
+      'email': instance.email,
+      'password': instance.password,
+      'business_name': instance.businessName,
+      'blueprint_id': instance.blueprintId,
+    };
+
 _$RequestOTPResponseImpl _$$RequestOTPResponseImplFromJson(
   Map<String, dynamic> json,
 ) => _$RequestOTPResponseImpl(
-  otpToken: json['otpToken'] as String,
-  expiresAt: DateTime.parse(json['expiresAt'] as String),
+  otpToken: json['otp_token'] as String,
+  expiresAt: DateTime.parse(json['expires_at'] as String),
   message: json['message'] as String,
 );
 
 Map<String, dynamic> _$$RequestOTPResponseImplToJson(
   _$RequestOTPResponseImpl instance,
 ) => <String, dynamic>{
-  'otpToken': instance.otpToken,
-  'expiresAt': instance.expiresAt.toIso8601String(),
+  'otp_token': instance.otpToken,
+  'expires_at': instance.expiresAt.toIso8601String(),
   'message': instance.message,
 };
 
 _$LoginResponseImpl _$$LoginResponseImplFromJson(Map<String, dynamic> json) =>
     _$LoginResponseImpl(
       token: json['token'] as String,
-      csrfToken: json['csrfToken'] as String?,
-      userId: json['userId'] as String,
-      userType: json['userType'] as String,
-      businessId: json['businessId'] as String?,
-      storeCode: json['storeCode'] as String?,
+      csrfToken: json['csrf_token'] as String?,
+      userId: json['user_id'] as String,
+      userType: json['user_type'] as String,
+      businessId: json['business_id'] as String?,
+      storeCode: json['store_code'] as String?,
       role: json['role'] as String?,
       businesses: (json['businesses'] as List<dynamic>?)
           ?.map((e) => BusinessRole.fromJson(e as Map<String, dynamic>))
           .toList(),
-      expiresAt: DateTime.parse(json['expiresAt'] as String),
+      expiresAt: DateTime.parse(json['expires_at'] as String),
     );
 
 Map<String, dynamic> _$$LoginResponseImplToJson(_$LoginResponseImpl instance) =>
     <String, dynamic>{
       'token': instance.token,
-      'csrfToken': instance.csrfToken,
-      'userId': instance.userId,
-      'userType': instance.userType,
-      'businessId': instance.businessId,
-      'storeCode': instance.storeCode,
+      'csrf_token': instance.csrfToken,
+      'user_id': instance.userId,
+      'user_type': instance.userType,
+      'business_id': instance.businessId,
+      'store_code': instance.storeCode,
       'role': instance.role,
       'businesses': instance.businesses,
-      'expiresAt': instance.expiresAt.toIso8601String(),
+      'expires_at': instance.expiresAt.toIso8601String(),
     };
 
 _$BusinessRoleImpl _$$BusinessRoleImplFromJson(Map<String, dynamic> json) =>
     _$BusinessRoleImpl(
-      businessId: json['businessId'] as String,
-      businessName: json['businessName'] as String,
-      storeCode: json['storeCode'] as String,
+      businessId: json['business_id'] as String,
+      storeCode: json['store_code'] as String,
       role: json['role'] as String,
     );
 
 Map<String, dynamic> _$$BusinessRoleImplToJson(_$BusinessRoleImpl instance) =>
     <String, dynamic>{
-      'businessId': instance.businessId,
-      'businessName': instance.businessName,
-      'storeCode': instance.storeCode,
+      'business_id': instance.businessId,
+      'store_code': instance.storeCode,
       'role': instance.role,
     };
 
@@ -160,3 +178,32 @@ Map<String, dynamic> _$$UserImplToJson(_$UserImpl instance) =>
       'is_verified': instance.isVerified,
       'created_at': instance.createdAt.toIso8601String(),
     };
+
+_$SignUpResponseImpl _$$SignUpResponseImplFromJson(Map<String, dynamic> json) {
+  // Validate user field
+  final userData = json['user'];
+  if (userData == null) {
+    throw ArgumentError('user field is required in SignUpResponse');
+  }
+  if (userData is! Map<String, dynamic>) {
+    throw ArgumentError('user field must be a Map, got ${userData.runtimeType}');
+  }
+  
+  // Validate business field
+  final businessData = json['business'];
+  if (businessData == null) {
+    throw ArgumentError('business field is required in SignUpResponse');
+  }
+  if (businessData is! Map<String, dynamic>) {
+    throw ArgumentError('business field must be a Map, got ${businessData.runtimeType}');
+  }
+  
+  return _$SignUpResponseImpl(
+    user: User.fromJson(userData),
+    business: Business.fromJson(businessData),
+  );
+}
+
+Map<String, dynamic> _$$SignUpResponseImplToJson(
+  _$SignUpResponseImpl instance,
+) => <String, dynamic>{'user': instance.user, 'business': instance.business};

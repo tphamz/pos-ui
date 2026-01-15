@@ -121,17 +121,17 @@ class _OTPVerificationScreenState
     final authState = ref.watch(authProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Verify OTP'),
-      ),
+      // AppBar is now handled globally in main.dart
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                 Icon(
                   Icons.verified_user,
                   size: 80,
@@ -172,8 +172,6 @@ class _OTPVerificationScreenState
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    filled: true,
-                    fillColor: Colors.grey[100],
                   ),
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
@@ -227,6 +225,7 @@ class _OTPVerificationScreenState
                   ),
                 ],
               ],
+              ),
             ),
           ),
         ),

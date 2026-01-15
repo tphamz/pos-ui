@@ -14,9 +14,30 @@ class AuthService {
         '/auth/otp/request',
         data: request.toJson(),
       );
-      return RequestOTPResponse.fromJson(response.data);
+      
+      // Check if response is successful
+      if (response.statusCode != null && response.statusCode! >= 400) {
+        throw _handleError(DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          type: DioExceptionType.badResponse,
+        ));
+      }
+      
+      // Validate response data is a Map
+      if (response.data is! Map<String, dynamic>) {
+        throw 'Invalid response format from server';
+      }
+      
+      return RequestOTPResponse.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleError(e);
+    } catch (e) {
+      // Handle non-DioException errors (like type cast errors)
+      if (e is TypeError) {
+        throw 'Invalid response format from server. Please try again.';
+      }
+      rethrow;
     }
   }
 
@@ -27,7 +48,22 @@ class AuthService {
         '/auth/otp/verify',
         data: request.toJson(),
       );
-      final loginResponse = LoginResponse.fromJson(response.data);
+      
+      // Check if response is successful
+      if (response.statusCode != null && response.statusCode! >= 400) {
+        throw _handleError(DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          type: DioExceptionType.badResponse,
+        ));
+      }
+      
+      // Validate response data is a Map
+      if (response.data is! Map<String, dynamic>) {
+        throw 'Invalid response format from server';
+      }
+      
+      final loginResponse = LoginResponse.fromJson(response.data as Map<String, dynamic>);
       
       // Store the auth token
       if (loginResponse.token.isNotEmpty) {
@@ -37,6 +73,12 @@ class AuthService {
       return loginResponse;
     } on DioException catch (e) {
       throw _handleError(e);
+    } catch (e) {
+      // Handle non-DioException errors (like type cast errors)
+      if (e is TypeError) {
+        throw 'Invalid response format from server. Please try again.';
+      }
+      rethrow;
     }
   }
 
@@ -47,7 +89,22 @@ class AuthService {
         '/auth/login',
         data: request.toJson(),
       );
-      final loginResponse = LoginResponse.fromJson(response.data);
+      
+      // Check if response is successful
+      if (response.statusCode != null && response.statusCode! >= 400) {
+        throw _handleError(DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          type: DioExceptionType.badResponse,
+        ));
+      }
+      
+      // Validate response data is a Map
+      if (response.data is! Map<String, dynamic>) {
+        throw 'Invalid response format from server';
+      }
+      
+      final loginResponse = LoginResponse.fromJson(response.data as Map<String, dynamic>);
       
       // Store the auth token
       if (loginResponse.token.isNotEmpty) {
@@ -57,6 +114,12 @@ class AuthService {
       return loginResponse;
     } on DioException catch (e) {
       throw _handleError(e);
+    } catch (e) {
+      // Handle non-DioException errors (like type cast errors)
+      if (e is TypeError) {
+        throw 'Invalid response format from server. Please try again.';
+      }
+      rethrow;
     }
   }
 

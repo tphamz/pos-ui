@@ -7,18 +7,37 @@ class UserService {
 
   UserService(this._apiClient);
 
-  // Sign up (create user)
-  // Note: This endpoint requires authentication and permissions
-  // For public signup, you'd need a separate public endpoint
-  Future<User> signup(CreateUserRequest request) async {
+  // Sign up (create user and business) - Public endpoint
+  Future<SignUpResponse> signup(SignUpRequest request) async {
     try {
       final response = await _apiClient.dio.post(
-        '/users',
+        '/auth/signup',
         data: request.toJson(),
       );
-      return User.fromJson(response.data);
+      
+      // Check if response is successful
+      if (response.statusCode != null && response.statusCode! >= 400) {
+        throw _handleError(DioException(
+          requestOptions: response.requestOptions,
+          response: response,
+          type: DioExceptionType.badResponse,
+        ));
+      }
+      
+      // Validate response data is a Map
+      if (response.data is! Map<String, dynamic>) {
+        throw 'Invalid response format from server';
+      }
+      
+      return SignUpResponse.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleError(e);
+    } catch (e) {
+      // Handle non-DioException errors (like type cast errors)
+      if (e is TypeError) {
+        throw 'Invalid response format from server. Please try again.';
+      }
+      rethrow;
     }
   }
 

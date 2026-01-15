@@ -15,6 +15,7 @@ class SignupScreen extends ConsumerStatefulWidget {
 class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _fullNameController = TextEditingController();
+  final _businessNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -27,6 +28,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   @override
   void dispose() {
     _fullNameController.dispose();
+    _businessNameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
@@ -46,12 +48,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       final email = _emailController.text.trim().isEmpty
           ? null
           : _emailController.text.trim();
-      final phoneNumber = _phoneController.text.trim().isEmpty
+      final phoneNumberRaw = _phoneController.text.trim().isEmpty
           ? null
           : _phoneController.text.trim();
 
       // Validate that at least one contact method is provided
-      if (email == null && phoneNumber == null) {
+      if (email == null && phoneNumberRaw == null) {
         setState(() {
           _error = 'Please provide either email or phone number';
           _isLoading = false;
@@ -59,8 +61,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         return;
       }
 
-      final request = CreateUserRequest(
+      // Normalize phone number if provided (10-digit US numbers -> +1XXXXXXXXXX)
+      final phoneNumber = phoneNumberRaw != null
+          ? ValidationUtils.normalizePhoneNumber(phoneNumberRaw)
+          : null;
+
+      final request = SignUpRequest(
         fullName: _fullNameController.text.trim(),
+        businessName: _businessNameController.text.trim(),
         email: email,
         phoneNumber: phoneNumber,
         password: _passwordController.text.isEmpty
@@ -162,6 +170,27 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     ),
                     const SizedBox(height: 16),
 
+                    // Business Name field (required)
+                    TextFormField(
+                      controller: _businessNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Business Name *',
+                        hintText: 'My Business',
+                        prefixIcon: Icon(Icons.business_outlined),
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your business name';
+                        }
+                        if (value.trim().length < 2) {
+                          return 'Business name must be at least 2 characters';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
                     // Email field
                     TextFormField(
                       controller: _emailController,
@@ -197,7 +226,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         if (value != null &&
                             value.isNotEmpty &&
                             !ValidationUtils.isValidPhone(value)) {
-                          return 'Please enter a valid phone number (E.164 format)';
+                          return 'Please enter a valid phone number (e.g., +1234567890)';
                         }
                         return null;
                       },

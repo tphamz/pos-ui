@@ -194,8 +194,9 @@ VerifyOTPRequest _$VerifyOTPRequestFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$VerifyOTPRequest {
-  String get otpToken =>
-      throw _privateConstructorUsedError; // JWT token from RequestOTP response
+  @JsonKey(name: 'otp_token')
+  String get otpToken => throw _privateConstructorUsedError; // JWT token from RequestOTP response
+  @JsonKey(name: 'otp_code')
   String get otpCode => throw _privateConstructorUsedError;
 
   /// Serializes this VerifyOTPRequest to a JSON map.
@@ -215,7 +216,10 @@ abstract class $VerifyOTPRequestCopyWith<$Res> {
     $Res Function(VerifyOTPRequest) then,
   ) = _$VerifyOTPRequestCopyWithImpl<$Res, VerifyOTPRequest>;
   @useResult
-  $Res call({String otpToken, String otpCode});
+  $Res call({
+    @JsonKey(name: 'otp_token') String otpToken,
+    @JsonKey(name: 'otp_code') String otpCode,
+  });
 }
 
 /// @nodoc
@@ -258,7 +262,10 @@ abstract class _$$VerifyOTPRequestImplCopyWith<$Res>
   ) = __$$VerifyOTPRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String otpToken, String otpCode});
+  $Res call({
+    @JsonKey(name: 'otp_token') String otpToken,
+    @JsonKey(name: 'otp_code') String otpCode,
+  });
 }
 
 /// @nodoc
@@ -293,15 +300,20 @@ class __$$VerifyOTPRequestImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$VerifyOTPRequestImpl implements _VerifyOTPRequest {
-  const _$VerifyOTPRequestImpl({required this.otpToken, required this.otpCode});
+  const _$VerifyOTPRequestImpl({
+    @JsonKey(name: 'otp_token') required this.otpToken,
+    @JsonKey(name: 'otp_code') required this.otpCode,
+  });
 
   factory _$VerifyOTPRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$VerifyOTPRequestImplFromJson(json);
 
   @override
+  @JsonKey(name: 'otp_token')
   final String otpToken;
   // JWT token from RequestOTP response
   @override
+  @JsonKey(name: 'otp_code')
   final String otpCode;
 
   @override
@@ -342,16 +354,18 @@ class _$VerifyOTPRequestImpl implements _VerifyOTPRequest {
 
 abstract class _VerifyOTPRequest implements VerifyOTPRequest {
   const factory _VerifyOTPRequest({
-    required final String otpToken,
-    required final String otpCode,
+    @JsonKey(name: 'otp_token') required final String otpToken,
+    @JsonKey(name: 'otp_code') required final String otpCode,
   }) = _$VerifyOTPRequestImpl;
 
   factory _VerifyOTPRequest.fromJson(Map<String, dynamic> json) =
       _$VerifyOTPRequestImpl.fromJson;
 
   @override
+  @JsonKey(name: 'otp_token')
   String get otpToken; // JWT token from RequestOTP response
   @override
+  @JsonKey(name: 'otp_code')
   String get otpCode;
 
   /// Create a copy of VerifyOTPRequest
@@ -1005,14 +1019,309 @@ abstract class _CreateUserRequest implements CreateUserRequest {
       throw _privateConstructorUsedError;
 }
 
+SignUpRequest _$SignUpRequestFromJson(Map<String, dynamic> json) {
+  return _SignUpRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$SignUpRequest {
+  @JsonKey(name: 'full_name')
+  String get fullName => throw _privateConstructorUsedError;
+  @JsonKey(name: 'phone_number')
+  String? get phoneNumber => throw _privateConstructorUsedError;
+  @JsonKey(name: 'email')
+  String? get email => throw _privateConstructorUsedError;
+  @JsonKey(name: 'password')
+  String? get password => throw _privateConstructorUsedError;
+  @JsonKey(name: 'business_name')
+  String get businessName => throw _privateConstructorUsedError;
+  @JsonKey(name: 'blueprint_id')
+  String? get blueprintId => throw _privateConstructorUsedError;
+
+  /// Serializes this SignUpRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of SignUpRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $SignUpRequestCopyWith<SignUpRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $SignUpRequestCopyWith<$Res> {
+  factory $SignUpRequestCopyWith(
+    SignUpRequest value,
+    $Res Function(SignUpRequest) then,
+  ) = _$SignUpRequestCopyWithImpl<$Res, SignUpRequest>;
+  @useResult
+  $Res call({
+    @JsonKey(name: 'full_name') String fullName,
+    @JsonKey(name: 'phone_number') String? phoneNumber,
+    @JsonKey(name: 'email') String? email,
+    @JsonKey(name: 'password') String? password,
+    @JsonKey(name: 'business_name') String businessName,
+    @JsonKey(name: 'blueprint_id') String? blueprintId,
+  });
+}
+
+/// @nodoc
+class _$SignUpRequestCopyWithImpl<$Res, $Val extends SignUpRequest>
+    implements $SignUpRequestCopyWith<$Res> {
+  _$SignUpRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of SignUpRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? fullName = null,
+    Object? phoneNumber = freezed,
+    Object? email = freezed,
+    Object? password = freezed,
+    Object? businessName = null,
+    Object? blueprintId = freezed,
+  }) {
+    return _then(
+      _value.copyWith(
+            fullName: null == fullName
+                ? _value.fullName
+                : fullName // ignore: cast_nullable_to_non_nullable
+                      as String,
+            phoneNumber: freezed == phoneNumber
+                ? _value.phoneNumber
+                : phoneNumber // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            email: freezed == email
+                ? _value.email
+                : email // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            password: freezed == password
+                ? _value.password
+                : password // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            businessName: null == businessName
+                ? _value.businessName
+                : businessName // ignore: cast_nullable_to_non_nullable
+                      as String,
+            blueprintId: freezed == blueprintId
+                ? _value.blueprintId
+                : blueprintId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$SignUpRequestImplCopyWith<$Res>
+    implements $SignUpRequestCopyWith<$Res> {
+  factory _$$SignUpRequestImplCopyWith(
+    _$SignUpRequestImpl value,
+    $Res Function(_$SignUpRequestImpl) then,
+  ) = __$$SignUpRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    @JsonKey(name: 'full_name') String fullName,
+    @JsonKey(name: 'phone_number') String? phoneNumber,
+    @JsonKey(name: 'email') String? email,
+    @JsonKey(name: 'password') String? password,
+    @JsonKey(name: 'business_name') String businessName,
+    @JsonKey(name: 'blueprint_id') String? blueprintId,
+  });
+}
+
+/// @nodoc
+class __$$SignUpRequestImplCopyWithImpl<$Res>
+    extends _$SignUpRequestCopyWithImpl<$Res, _$SignUpRequestImpl>
+    implements _$$SignUpRequestImplCopyWith<$Res> {
+  __$$SignUpRequestImplCopyWithImpl(
+    _$SignUpRequestImpl _value,
+    $Res Function(_$SignUpRequestImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of SignUpRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? fullName = null,
+    Object? phoneNumber = freezed,
+    Object? email = freezed,
+    Object? password = freezed,
+    Object? businessName = null,
+    Object? blueprintId = freezed,
+  }) {
+    return _then(
+      _$SignUpRequestImpl(
+        fullName: null == fullName
+            ? _value.fullName
+            : fullName // ignore: cast_nullable_to_non_nullable
+                  as String,
+        phoneNumber: freezed == phoneNumber
+            ? _value.phoneNumber
+            : phoneNumber // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        email: freezed == email
+            ? _value.email
+            : email // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        password: freezed == password
+            ? _value.password
+            : password // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        businessName: null == businessName
+            ? _value.businessName
+            : businessName // ignore: cast_nullable_to_non_nullable
+                  as String,
+        blueprintId: freezed == blueprintId
+            ? _value.blueprintId
+            : blueprintId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$SignUpRequestImpl implements _SignUpRequest {
+  const _$SignUpRequestImpl({
+    @JsonKey(name: 'full_name') required this.fullName,
+    @JsonKey(name: 'phone_number') this.phoneNumber,
+    @JsonKey(name: 'email') this.email,
+    @JsonKey(name: 'password') this.password,
+    @JsonKey(name: 'business_name') required this.businessName,
+    @JsonKey(name: 'blueprint_id') this.blueprintId,
+  });
+
+  factory _$SignUpRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$SignUpRequestImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'full_name')
+  final String fullName;
+  @override
+  @JsonKey(name: 'phone_number')
+  final String? phoneNumber;
+  @override
+  @JsonKey(name: 'email')
+  final String? email;
+  @override
+  @JsonKey(name: 'password')
+  final String? password;
+  @override
+  @JsonKey(name: 'business_name')
+  final String businessName;
+  @override
+  @JsonKey(name: 'blueprint_id')
+  final String? blueprintId;
+
+  @override
+  String toString() {
+    return 'SignUpRequest(fullName: $fullName, phoneNumber: $phoneNumber, email: $email, password: $password, businessName: $businessName, blueprintId: $blueprintId)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$SignUpRequestImpl &&
+            (identical(other.fullName, fullName) ||
+                other.fullName == fullName) &&
+            (identical(other.phoneNumber, phoneNumber) ||
+                other.phoneNumber == phoneNumber) &&
+            (identical(other.email, email) || other.email == email) &&
+            (identical(other.password, password) ||
+                other.password == password) &&
+            (identical(other.businessName, businessName) ||
+                other.businessName == businessName) &&
+            (identical(other.blueprintId, blueprintId) ||
+                other.blueprintId == blueprintId));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    fullName,
+    phoneNumber,
+    email,
+    password,
+    businessName,
+    blueprintId,
+  );
+
+  /// Create a copy of SignUpRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$SignUpRequestImplCopyWith<_$SignUpRequestImpl> get copyWith =>
+      __$$SignUpRequestImplCopyWithImpl<_$SignUpRequestImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$SignUpRequestImplToJson(this);
+  }
+}
+
+abstract class _SignUpRequest implements SignUpRequest {
+  const factory _SignUpRequest({
+    @JsonKey(name: 'full_name') required final String fullName,
+    @JsonKey(name: 'phone_number') final String? phoneNumber,
+    @JsonKey(name: 'email') final String? email,
+    @JsonKey(name: 'password') final String? password,
+    @JsonKey(name: 'business_name') required final String businessName,
+    @JsonKey(name: 'blueprint_id') final String? blueprintId,
+  }) = _$SignUpRequestImpl;
+
+  factory _SignUpRequest.fromJson(Map<String, dynamic> json) =
+      _$SignUpRequestImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'full_name')
+  String get fullName;
+  @override
+  @JsonKey(name: 'phone_number')
+  String? get phoneNumber;
+  @override
+  @JsonKey(name: 'email')
+  String? get email;
+  @override
+  @JsonKey(name: 'password')
+  String? get password;
+  @override
+  @JsonKey(name: 'business_name')
+  String get businessName;
+  @override
+  @JsonKey(name: 'blueprint_id')
+  String? get blueprintId;
+
+  /// Create a copy of SignUpRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$SignUpRequestImplCopyWith<_$SignUpRequestImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 RequestOTPResponse _$RequestOTPResponseFromJson(Map<String, dynamic> json) {
   return _RequestOTPResponse.fromJson(json);
 }
 
 /// @nodoc
 mixin _$RequestOTPResponse {
-  String get otpToken =>
-      throw _privateConstructorUsedError; // Stateless JWT containing hashed code
+  @JsonKey(name: 'otp_token')
+  String get otpToken => throw _privateConstructorUsedError; // Stateless JWT containing hashed code
+  @JsonKey(name: 'expires_at')
   DateTime get expiresAt => throw _privateConstructorUsedError;
   String get message => throw _privateConstructorUsedError;
 
@@ -1033,7 +1342,11 @@ abstract class $RequestOTPResponseCopyWith<$Res> {
     $Res Function(RequestOTPResponse) then,
   ) = _$RequestOTPResponseCopyWithImpl<$Res, RequestOTPResponse>;
   @useResult
-  $Res call({String otpToken, DateTime expiresAt, String message});
+  $Res call({
+    @JsonKey(name: 'otp_token') String otpToken,
+    @JsonKey(name: 'expires_at') DateTime expiresAt,
+    String message,
+  });
 }
 
 /// @nodoc
@@ -1084,7 +1397,11 @@ abstract class _$$RequestOTPResponseImplCopyWith<$Res>
   ) = __$$RequestOTPResponseImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String otpToken, DateTime expiresAt, String message});
+  $Res call({
+    @JsonKey(name: 'otp_token') String otpToken,
+    @JsonKey(name: 'expires_at') DateTime expiresAt,
+    String message,
+  });
 }
 
 /// @nodoc
@@ -1128,8 +1445,8 @@ class __$$RequestOTPResponseImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$RequestOTPResponseImpl implements _RequestOTPResponse {
   const _$RequestOTPResponseImpl({
-    required this.otpToken,
-    required this.expiresAt,
+    @JsonKey(name: 'otp_token') required this.otpToken,
+    @JsonKey(name: 'expires_at') required this.expiresAt,
     required this.message,
   });
 
@@ -1137,9 +1454,11 @@ class _$RequestOTPResponseImpl implements _RequestOTPResponse {
       _$$RequestOTPResponseImplFromJson(json);
 
   @override
+  @JsonKey(name: 'otp_token')
   final String otpToken;
   // Stateless JWT containing hashed code
   @override
+  @JsonKey(name: 'expires_at')
   final DateTime expiresAt;
   @override
   final String message;
@@ -1184,8 +1503,8 @@ class _$RequestOTPResponseImpl implements _RequestOTPResponse {
 
 abstract class _RequestOTPResponse implements RequestOTPResponse {
   const factory _RequestOTPResponse({
-    required final String otpToken,
-    required final DateTime expiresAt,
+    @JsonKey(name: 'otp_token') required final String otpToken,
+    @JsonKey(name: 'expires_at') required final DateTime expiresAt,
     required final String message,
   }) = _$RequestOTPResponseImpl;
 
@@ -1193,8 +1512,10 @@ abstract class _RequestOTPResponse implements RequestOTPResponse {
       _$RequestOTPResponseImpl.fromJson;
 
   @override
+  @JsonKey(name: 'otp_token')
   String get otpToken; // Stateless JWT containing hashed code
   @override
+  @JsonKey(name: 'expires_at')
   DateTime get expiresAt;
   @override
   String get message;
@@ -1214,17 +1535,20 @@ LoginResponse _$LoginResponseFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$LoginResponse {
   String get token => throw _privateConstructorUsedError;
-  String? get csrfToken =>
-      throw _privateConstructorUsedError; // Only for web clients
+  @JsonKey(name: 'csrf_token')
+  String? get csrfToken => throw _privateConstructorUsedError; // Only for web clients
+  @JsonKey(name: 'user_id')
   String get userId => throw _privateConstructorUsedError;
-  String get userType =>
-      throw _privateConstructorUsedError; // "admin" or "staff"
-  String? get businessId =>
-      throw _privateConstructorUsedError; // For staff type
+  @JsonKey(name: 'user_type')
+  String get userType => throw _privateConstructorUsedError; // "admin" or "staff"
+  @JsonKey(name: 'business_id')
+  String? get businessId => throw _privateConstructorUsedError; // For staff type
+  @JsonKey(name: 'store_code')
   String? get storeCode => throw _privateConstructorUsedError; // For staff type
   String? get role => throw _privateConstructorUsedError; // For staff type
   List<BusinessRole>? get businesses =>
       throw _privateConstructorUsedError; // For admin type
+  @JsonKey(name: 'expires_at')
   DateTime get expiresAt => throw _privateConstructorUsedError;
 
   /// Serializes this LoginResponse to a JSON map.
@@ -1246,14 +1570,14 @@ abstract class $LoginResponseCopyWith<$Res> {
   @useResult
   $Res call({
     String token,
-    String? csrfToken,
-    String userId,
-    String userType,
-    String? businessId,
-    String? storeCode,
+    @JsonKey(name: 'csrf_token') String? csrfToken,
+    @JsonKey(name: 'user_id') String userId,
+    @JsonKey(name: 'user_type') String userType,
+    @JsonKey(name: 'business_id') String? businessId,
+    @JsonKey(name: 'store_code') String? storeCode,
     String? role,
     List<BusinessRole>? businesses,
-    DateTime expiresAt,
+    @JsonKey(name: 'expires_at') DateTime expiresAt,
   });
 }
 
@@ -1337,14 +1661,14 @@ abstract class _$$LoginResponseImplCopyWith<$Res>
   @useResult
   $Res call({
     String token,
-    String? csrfToken,
-    String userId,
-    String userType,
-    String? businessId,
-    String? storeCode,
+    @JsonKey(name: 'csrf_token') String? csrfToken,
+    @JsonKey(name: 'user_id') String userId,
+    @JsonKey(name: 'user_type') String userType,
+    @JsonKey(name: 'business_id') String? businessId,
+    @JsonKey(name: 'store_code') String? storeCode,
     String? role,
     List<BusinessRole>? businesses,
-    DateTime expiresAt,
+    @JsonKey(name: 'expires_at') DateTime expiresAt,
   });
 }
 
@@ -1420,14 +1744,14 @@ class __$$LoginResponseImplCopyWithImpl<$Res>
 class _$LoginResponseImpl implements _LoginResponse {
   const _$LoginResponseImpl({
     required this.token,
-    this.csrfToken,
-    required this.userId,
-    required this.userType,
-    this.businessId,
-    this.storeCode,
+    @JsonKey(name: 'csrf_token') this.csrfToken,
+    @JsonKey(name: 'user_id') required this.userId,
+    @JsonKey(name: 'user_type') required this.userType,
+    @JsonKey(name: 'business_id') this.businessId,
+    @JsonKey(name: 'store_code') this.storeCode,
     this.role,
     final List<BusinessRole>? businesses,
-    required this.expiresAt,
+    @JsonKey(name: 'expires_at') required this.expiresAt,
   }) : _businesses = businesses;
 
   factory _$LoginResponseImpl.fromJson(Map<String, dynamic> json) =>
@@ -1436,17 +1760,22 @@ class _$LoginResponseImpl implements _LoginResponse {
   @override
   final String token;
   @override
+  @JsonKey(name: 'csrf_token')
   final String? csrfToken;
   // Only for web clients
   @override
+  @JsonKey(name: 'user_id')
   final String userId;
   @override
+  @JsonKey(name: 'user_type')
   final String userType;
   // "admin" or "staff"
   @override
+  @JsonKey(name: 'business_id')
   final String? businessId;
   // For staff type
   @override
+  @JsonKey(name: 'store_code')
   final String? storeCode;
   // For staff type
   @override
@@ -1465,6 +1794,7 @@ class _$LoginResponseImpl implements _LoginResponse {
 
   // For admin type
   @override
+  @JsonKey(name: 'expires_at')
   final DateTime expiresAt;
 
   @override
@@ -1528,14 +1858,14 @@ class _$LoginResponseImpl implements _LoginResponse {
 abstract class _LoginResponse implements LoginResponse {
   const factory _LoginResponse({
     required final String token,
-    final String? csrfToken,
-    required final String userId,
-    required final String userType,
-    final String? businessId,
-    final String? storeCode,
+    @JsonKey(name: 'csrf_token') final String? csrfToken,
+    @JsonKey(name: 'user_id') required final String userId,
+    @JsonKey(name: 'user_type') required final String userType,
+    @JsonKey(name: 'business_id') final String? businessId,
+    @JsonKey(name: 'store_code') final String? storeCode,
     final String? role,
     final List<BusinessRole>? businesses,
-    required final DateTime expiresAt,
+    @JsonKey(name: 'expires_at') required final DateTime expiresAt,
   }) = _$LoginResponseImpl;
 
   factory _LoginResponse.fromJson(Map<String, dynamic> json) =
@@ -1544,20 +1874,26 @@ abstract class _LoginResponse implements LoginResponse {
   @override
   String get token;
   @override
+  @JsonKey(name: 'csrf_token')
   String? get csrfToken; // Only for web clients
   @override
+  @JsonKey(name: 'user_id')
   String get userId;
   @override
+  @JsonKey(name: 'user_type')
   String get userType; // "admin" or "staff"
   @override
+  @JsonKey(name: 'business_id')
   String? get businessId; // For staff type
   @override
+  @JsonKey(name: 'store_code')
   String? get storeCode; // For staff type
   @override
   String? get role; // For staff type
   @override
   List<BusinessRole>? get businesses; // For admin type
   @override
+  @JsonKey(name: 'expires_at')
   DateTime get expiresAt;
 
   /// Create a copy of LoginResponse
@@ -1574,8 +1910,9 @@ BusinessRole _$BusinessRoleFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$BusinessRole {
+  @JsonKey(name: 'business_id')
   String get businessId => throw _privateConstructorUsedError;
-  String get businessName => throw _privateConstructorUsedError;
+  @JsonKey(name: 'store_code')
   String get storeCode => throw _privateConstructorUsedError;
   String get role => throw _privateConstructorUsedError;
 
@@ -1597,9 +1934,8 @@ abstract class $BusinessRoleCopyWith<$Res> {
   ) = _$BusinessRoleCopyWithImpl<$Res, BusinessRole>;
   @useResult
   $Res call({
-    String businessId,
-    String businessName,
-    String storeCode,
+    @JsonKey(name: 'business_id') String businessId,
+    @JsonKey(name: 'store_code') String storeCode,
     String role,
   });
 }
@@ -1620,7 +1956,6 @@ class _$BusinessRoleCopyWithImpl<$Res, $Val extends BusinessRole>
   @override
   $Res call({
     Object? businessId = null,
-    Object? businessName = null,
     Object? storeCode = null,
     Object? role = null,
   }) {
@@ -1629,10 +1964,6 @@ class _$BusinessRoleCopyWithImpl<$Res, $Val extends BusinessRole>
             businessId: null == businessId
                 ? _value.businessId
                 : businessId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            businessName: null == businessName
-                ? _value.businessName
-                : businessName // ignore: cast_nullable_to_non_nullable
                       as String,
             storeCode: null == storeCode
                 ? _value.storeCode
@@ -1658,9 +1989,8 @@ abstract class _$$BusinessRoleImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    String businessId,
-    String businessName,
-    String storeCode,
+    @JsonKey(name: 'business_id') String businessId,
+    @JsonKey(name: 'store_code') String storeCode,
     String role,
   });
 }
@@ -1680,7 +2010,6 @@ class __$$BusinessRoleImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? businessId = null,
-    Object? businessName = null,
     Object? storeCode = null,
     Object? role = null,
   }) {
@@ -1689,10 +2018,6 @@ class __$$BusinessRoleImplCopyWithImpl<$Res>
         businessId: null == businessId
             ? _value.businessId
             : businessId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        businessName: null == businessName
-            ? _value.businessName
-            : businessName // ignore: cast_nullable_to_non_nullable
                   as String,
         storeCode: null == storeCode
             ? _value.storeCode
@@ -1711,9 +2036,8 @@ class __$$BusinessRoleImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$BusinessRoleImpl implements _BusinessRole {
   const _$BusinessRoleImpl({
-    required this.businessId,
-    required this.businessName,
-    required this.storeCode,
+    @JsonKey(name: 'business_id') required this.businessId,
+    @JsonKey(name: 'store_code') required this.storeCode,
     required this.role,
   });
 
@@ -1721,17 +2045,17 @@ class _$BusinessRoleImpl implements _BusinessRole {
       _$$BusinessRoleImplFromJson(json);
 
   @override
+  @JsonKey(name: 'business_id')
   final String businessId;
   @override
-  final String businessName;
-  @override
+  @JsonKey(name: 'store_code')
   final String storeCode;
   @override
   final String role;
 
   @override
   String toString() {
-    return 'BusinessRole(businessId: $businessId, businessName: $businessName, storeCode: $storeCode, role: $role)';
+    return 'BusinessRole(businessId: $businessId, storeCode: $storeCode, role: $role)';
   }
 
   @override
@@ -1741,8 +2065,6 @@ class _$BusinessRoleImpl implements _BusinessRole {
             other is _$BusinessRoleImpl &&
             (identical(other.businessId, businessId) ||
                 other.businessId == businessId) &&
-            (identical(other.businessName, businessName) ||
-                other.businessName == businessName) &&
             (identical(other.storeCode, storeCode) ||
                 other.storeCode == storeCode) &&
             (identical(other.role, role) || other.role == role));
@@ -1750,8 +2072,7 @@ class _$BusinessRoleImpl implements _BusinessRole {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, businessId, businessName, storeCode, role);
+  int get hashCode => Object.hash(runtimeType, businessId, storeCode, role);
 
   /// Create a copy of BusinessRole
   /// with the given fields replaced by the non-null parameter values.
@@ -1769,9 +2090,8 @@ class _$BusinessRoleImpl implements _BusinessRole {
 
 abstract class _BusinessRole implements BusinessRole {
   const factory _BusinessRole({
-    required final String businessId,
-    required final String businessName,
-    required final String storeCode,
+    @JsonKey(name: 'business_id') required final String businessId,
+    @JsonKey(name: 'store_code') required final String storeCode,
     required final String role,
   }) = _$BusinessRoleImpl;
 
@@ -1779,10 +2099,10 @@ abstract class _BusinessRole implements BusinessRole {
       _$BusinessRoleImpl.fromJson;
 
   @override
+  @JsonKey(name: 'business_id')
   String get businessId;
   @override
-  String get businessName;
-  @override
+  @JsonKey(name: 'store_code')
   String get storeCode;
   @override
   String get role;
@@ -2078,5 +2398,205 @@ abstract class _User implements User {
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$UserImplCopyWith<_$UserImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+SignUpResponse _$SignUpResponseFromJson(Map<String, dynamic> json) {
+  return _SignUpResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$SignUpResponse {
+  User get user => throw _privateConstructorUsedError;
+  Business get business => throw _privateConstructorUsedError;
+
+  /// Serializes this SignUpResponse to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of SignUpResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $SignUpResponseCopyWith<SignUpResponse> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $SignUpResponseCopyWith<$Res> {
+  factory $SignUpResponseCopyWith(
+    SignUpResponse value,
+    $Res Function(SignUpResponse) then,
+  ) = _$SignUpResponseCopyWithImpl<$Res, SignUpResponse>;
+  @useResult
+  $Res call({User user, Business business});
+
+  $UserCopyWith<$Res> get user;
+  $BusinessCopyWith<$Res> get business;
+}
+
+/// @nodoc
+class _$SignUpResponseCopyWithImpl<$Res, $Val extends SignUpResponse>
+    implements $SignUpResponseCopyWith<$Res> {
+  _$SignUpResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of SignUpResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? user = null, Object? business = null}) {
+    return _then(
+      _value.copyWith(
+            user: null == user
+                ? _value.user
+                : user // ignore: cast_nullable_to_non_nullable
+                      as User,
+            business: null == business
+                ? _value.business
+                : business // ignore: cast_nullable_to_non_nullable
+                      as Business,
+          )
+          as $Val,
+    );
+  }
+
+  /// Create a copy of SignUpResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $UserCopyWith<$Res> get user {
+    return $UserCopyWith<$Res>(_value.user, (value) {
+      return _then(_value.copyWith(user: value) as $Val);
+    });
+  }
+
+  /// Create a copy of SignUpResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $BusinessCopyWith<$Res> get business {
+    return $BusinessCopyWith<$Res>(_value.business, (value) {
+      return _then(_value.copyWith(business: value) as $Val);
+    });
+  }
+}
+
+/// @nodoc
+abstract class _$$SignUpResponseImplCopyWith<$Res>
+    implements $SignUpResponseCopyWith<$Res> {
+  factory _$$SignUpResponseImplCopyWith(
+    _$SignUpResponseImpl value,
+    $Res Function(_$SignUpResponseImpl) then,
+  ) = __$$SignUpResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({User user, Business business});
+
+  @override
+  $UserCopyWith<$Res> get user;
+  @override
+  $BusinessCopyWith<$Res> get business;
+}
+
+/// @nodoc
+class __$$SignUpResponseImplCopyWithImpl<$Res>
+    extends _$SignUpResponseCopyWithImpl<$Res, _$SignUpResponseImpl>
+    implements _$$SignUpResponseImplCopyWith<$Res> {
+  __$$SignUpResponseImplCopyWithImpl(
+    _$SignUpResponseImpl _value,
+    $Res Function(_$SignUpResponseImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of SignUpResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? user = null, Object? business = null}) {
+    return _then(
+      _$SignUpResponseImpl(
+        user: null == user
+            ? _value.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as User,
+        business: null == business
+            ? _value.business
+            : business // ignore: cast_nullable_to_non_nullable
+                  as Business,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$SignUpResponseImpl implements _SignUpResponse {
+  const _$SignUpResponseImpl({required this.user, required this.business});
+
+  factory _$SignUpResponseImpl.fromJson(Map<String, dynamic> json) =>
+      _$$SignUpResponseImplFromJson(json);
+
+  @override
+  final User user;
+  @override
+  final Business business;
+
+  @override
+  String toString() {
+    return 'SignUpResponse(user: $user, business: $business)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$SignUpResponseImpl &&
+            (identical(other.user, user) || other.user == user) &&
+            (identical(other.business, business) ||
+                other.business == business));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, user, business);
+
+  /// Create a copy of SignUpResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$SignUpResponseImplCopyWith<_$SignUpResponseImpl> get copyWith =>
+      __$$SignUpResponseImplCopyWithImpl<_$SignUpResponseImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$SignUpResponseImplToJson(this);
+  }
+}
+
+abstract class _SignUpResponse implements SignUpResponse {
+  const factory _SignUpResponse({
+    required final User user,
+    required final Business business,
+  }) = _$SignUpResponseImpl;
+
+  factory _SignUpResponse.fromJson(Map<String, dynamic> json) =
+      _$SignUpResponseImpl.fromJson;
+
+  @override
+  User get user;
+  @override
+  Business get business;
+
+  /// Create a copy of SignUpResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$SignUpResponseImplCopyWith<_$SignUpResponseImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

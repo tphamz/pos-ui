@@ -9,38 +9,46 @@ class ApiClient {
   static const String _tokenKey = 'auth_token';
   static const String _csrfTokenKey = 'csrf_token';
 
-  ApiClient() {
-    _dio = Dio(
-      BaseOptions(
-        baseUrl: ApiConfig.apiBaseUrl,
-        connectTimeout: ApiConfig.connectTimeout,
-        receiveTimeout: ApiConfig.receiveTimeout,
-        headers: ApiConfig.defaultHeaders,
-        followRedirects: true,
-        validateStatus: (status) => status! < 500,
-      ),
-    );
+  ApiClient({Dio? dio}) {
+    if (dio != null) {
+      // Use provided Dio instance (for testing)
+      _dio = dio;
+    } else {
+      _dio = Dio(
+        BaseOptions(
+          baseUrl: ApiConfig.apiBaseUrl,
+          connectTimeout: ApiConfig.connectTimeout,
+          receiveTimeout: ApiConfig.receiveTimeout,
+          headers: ApiConfig.defaultHeaders,
+          followRedirects: true,
+          validateStatus: (status) => status! < 500,
+        ),
+      );
 
-    // Configure HTTP client adapter to prefer IPv4
-    (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-      final client = HttpClient();
-      client.autoUncompress = true;
-      // Force IPv4 by preferring IPv4 addresses
-      return client;
-    };
+      // Configure HTTP client adapter to prefer IPv4
+      (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+        final client = HttpClient();
+        client.autoUncompress = true;
+        // Force IPv4 by preferring IPv4 addresses
+        return client;
+      };
 
-    // Add interceptors
-    _dio.interceptors.add(_AuthInterceptor());
-    _dio.interceptors.add(_ErrorInterceptor());
-    _dio.interceptors.add(LogInterceptor(
-      requestBody: true,
-      responseBody: true,
-      error: true,
-    ));
+      // Add interceptors
+      _dio.interceptors.add(_AuthInterceptor());
+      _dio.interceptors.add(_ErrorInterceptor());
+      _dio.interceptors.add(LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        error: true,
+      ));
+    }
   }
 
   // Get the Dio instance
   Dio get dio => _dio;
+  
+  // Set Dio instance (for testing)
+  set dio(Dio value) => _dio = value;
 
   // Set authentication token
   Future<void> setAuthToken(String? token) async {
