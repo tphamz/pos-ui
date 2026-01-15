@@ -71,9 +71,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         businessName: _businessNameController.text.trim(),
         email: email,
         phoneNumber: phoneNumber,
-        password: _passwordController.text.isEmpty
-            ? null
-            : _passwordController.text,
+        password: _passwordController.text,
       );
 
       final userService = ref.read(userServiceProvider);
@@ -104,9 +102,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400),
               child: Form(
@@ -115,16 +113,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Back button
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
                     // Logo/Title
                     Icon(
                       Icons.person_add,
@@ -246,8 +234,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       controller: _passwordController,
                       obscureText: !_isPasswordVisible,
                       decoration: InputDecoration(
-                        labelText: 'Password (Optional)',
-                        hintText: 'Leave empty for OTP-only login',
+                        labelText: 'Password *',
+                        hintText: 'Enter your password',
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -264,15 +252,16 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         border: const OutlineInputBorder(),
                       ),
                       validator: (value) {
-                        if (value != null && value.isNotEmpty) {
-                          if (value.length < 6) {
-                            return 'Password must be at least 6 characters';
-                          }
-                          // Validate confirm password matches
-                          if (_confirmPasswordController.text.isNotEmpty &&
-                              value != _confirmPasswordController.text) {
-                            return 'Passwords do not match';
-                          }
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password';
+                        }
+                        if (value.length < 6) {
+                          return 'Password must be at least 6 characters';
+                        }
+                        // Validate confirm password matches
+                        if (_confirmPasswordController.text.isNotEmpty &&
+                            value != _confirmPasswordController.text) {
+                          return 'Passwords do not match';
                         }
                         return null;
                       },
@@ -284,7 +273,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       controller: _confirmPasswordController,
                       obscureText: !_isConfirmPasswordVisible,
                       decoration: InputDecoration(
-                        labelText: 'Confirm Password (Optional)',
+                        labelText: 'Confirm Password *',
                         hintText: 'Re-enter password',
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
@@ -303,13 +292,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         border: const OutlineInputBorder(),
                       ),
                       validator: (value) {
-                        if (_passwordController.text.isNotEmpty) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please confirm your password';
-                          }
-                          if (value != _passwordController.text) {
-                            return 'Passwords do not match';
-                          }
+                        if (value == null || value.isEmpty) {
+                          return 'Please confirm your password';
+                        }
+                        if (value != _passwordController.text) {
+                          return 'Passwords do not match';
                         }
                         return null;
                       },
@@ -360,11 +347,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     // Login link
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          'Already have an account? ',
+                          'Already have an account?',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
+                        const SizedBox(width: 8),
                         TextButton(
                           onPressed: () {
                             Navigator.of(context).pushReplacement(
@@ -373,6 +362,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               ),
                             );
                           },
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            minimumSize: const Size(0, 36),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
                           child: const Text('Login'),
                         ),
                       ],

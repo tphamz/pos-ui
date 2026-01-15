@@ -206,12 +206,27 @@ class _OTPVerificationScreenState
                 ),
                 const SizedBox(height: 16),
 
-                // Resend OTP
-                TextButton(
-                  onPressed: _isResending ? null : _resendOTP,
-                  child: _isResending
-                      ? const Text('Resending...')
-                      : const Text('Resend Code'),
+                // Back and Resend buttons in a row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Back button with lighter color
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.grey[600],
+                      ),
+                      child: const Text('Back'),
+                    ),
+                    const SizedBox(width: 16),
+                    // Resend OTP
+                    TextButton(
+                      onPressed: _isResending ? null : _resendOTP,
+                      child: _isResending
+                          ? const Text('Resending...')
+                          : const Text('Resend Code'),
+                    ),
+                  ],
                 ),
 
                 if (authState.error != null) ...[

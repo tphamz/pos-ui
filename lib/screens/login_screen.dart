@@ -263,11 +263,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Signup link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        "Don't have an account? ",
+                        "Don't have an account?",
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
+                      const SizedBox(width: 8),
                       TextButton(
                         onPressed: () {
                           Navigator.of(context).push(
@@ -276,6 +278,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           );
                         },
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          minimumSize: const Size(0, 36),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
                         child: const Text('Sign Up'),
                       ),
                     ],

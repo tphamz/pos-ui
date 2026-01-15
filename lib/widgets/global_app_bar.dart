@@ -12,49 +12,24 @@ class GlobalAppBar extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
-    final currentRoute = ModalRoute.of(context)?.settings.name;
-
-    // Don't show back button on home screen or login screen
-    // Check if we can pop by checking if route is not initial routes
-    final showBackButton = currentRoute != '/home' && 
-                          currentRoute != '/login' &&
-                          currentRoute != null;
     
     // Show logout only when authenticated
     final showLogout = authState.isAuthenticated;
 
     return AppBar(
-      leading: showBackButton
-          ? IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                // Use Navigator only when button is pressed, not during build
-                if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
-                }
-              },
-            )
-          : null,
       automaticallyImplyLeading: false,
+      leading: const ThemeToggleButton(),
       title: const Text('POS System'),
       actions: [
-        if (showLogout) ...[
-          // Theme toggle next to logout
-          const ThemeToggleButton(),
+        if (showLogout)
           // Logout button
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await ref.read(authProvider.notifier).logout();
-              if (context.mounted) {
-                Navigator.of(context).pushReplacementNamed('/login');
-              }
+              // Navigation will be handled by the auth state listener in main.dart
             },
           ),
-        ] else ...[
-          // Theme toggle when not logged in
-          const ThemeToggleButton(),
-        ],
       ],
     );
   }
