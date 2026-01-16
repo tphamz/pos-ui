@@ -12,16 +12,36 @@ class LoginScreen extends ConsumerStatefulWidget {
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _contactController = TextEditingController();
   final _passwordController = TextEditingController();
   final _storeCodeController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _useOTP = false;
+  AnimationController? _animationController;
+  Animation<double>? _floatAnimation;
+  
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat(reverse: true);
+    
+    _floatAnimation = Tween<double>(
+      begin: -8.0,
+      end: 8.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController!,
+      curve: Curves.easeInOut,
+    ));
+  }
 
   @override
   void dispose() {
+    _animationController?.dispose();
     _contactController.dispose();
     _passwordController.dispose();
     _storeCodeController.dispose();
@@ -102,13 +122,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                  // Logo/Title
-                  Icon(
-                    Icons.point_of_sale,
-                    size: 80,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                  // Logo with floating animation (icon only)
+                  _floatAnimation != null
+                      ? AnimatedBuilder(
+                          animation: _floatAnimation!,
+                          builder: (context, child) {
+                            return Transform.translate(
+                              offset: Offset(0, _floatAnimation!.value),
+                              child: Icon(
+                                Icons.point_of_sale,
+                                size: 120,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.2),
+                              ),
+                            );
+                          },
+                        )
+                      : Icon(
+                          Icons.point_of_sale,
+                          size: 120,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withOpacity(0.2),
+                        ),
                   const SizedBox(height: 16),
+                  // Static title above the floating icon
                   Text(
                     'POS System',
                     style: Theme.of(context).textTheme.headlineLarge?.copyWith(
