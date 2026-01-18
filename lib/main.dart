@@ -3,9 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/pos_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
 import 'widgets/global_app_bar.dart';
+import 'theme/pos_theme.dart';
 
 void main() async {
   // Load environment variables from .env file
@@ -42,10 +44,10 @@ class _POSAppState extends ConsumerState<POSApp> {
           (route) => false,
         );
       }
-      // If user logged in, navigate to home
+      // If user logged in, navigate to POS
       else if (previous?.isAuthenticated == false && next.isAuthenticated) {
         _navigatorKey.currentState?.pushNamedAndRemoveUntil(
-          '/home',
+          '/pos',
           (route) => false,
         );
       }
@@ -55,101 +57,34 @@ class _POSAppState extends ConsumerState<POSApp> {
       title: 'POS System',
       debugShowCheckedModeBanner: false,
       navigatorKey: _navigatorKey,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-        cardTheme: CardThemeData(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.grey[50],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[300]!),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[300]!),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.green[600]!, width: 2),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.red[300]!, width: 1),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.red[500]!, width: 2),
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          floatingLabelBehavior: FloatingLabelBehavior.never,
-        ),
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-        cardTheme: CardThemeData(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: Colors.grey[900],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[700]!),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey[700]!),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.green[400]!, width: 2),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.red[700]!, width: 1),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.red[400]!, width: 2),
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          floatingLabelBehavior: FloatingLabelBehavior.never,
-        ),
-      ),
+      theme: POSTheme.lightTheme,
+      darkTheme: POSTheme.darkTheme,
       themeMode: themeMode,
-      initialRoute: authState.isAuthenticated ? '/home' : '/login',
+      initialRoute: authState.isAuthenticated ? '/pos' : '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
+        '/pos': (context) => const POSScreen(),
       },
       onGenerateRoute: (settings) {
         // Handle routes that need auth state
-        if (settings.name == '/home' && !authState.isAuthenticated) {
+        if ((settings.name == '/home' || settings.name == '/pos') && !authState.isAuthenticated) {
           return MaterialPageRoute(builder: (_) => const LoginScreen());
         }
         if (settings.name == '/login' && authState.isAuthenticated) {
-          return MaterialPageRoute(builder: (_) => const HomeScreen());
+          return MaterialPageRoute(builder: (_) => const POSScreen());
         }
         return null;
       },
       builder: (context, child) {
+        // Only show GlobalAppBar on non-POS screens
+        final route = ModalRoute.of(context);
+        final isPOSScreen = route?.settings.name == '/pos';
+        
+        if (isPOSScreen) {
+          return child!;
+        }
+        
         return Scaffold(
           appBar: const GlobalAppBar(),
           body: child!,

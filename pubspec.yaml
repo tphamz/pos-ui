@@ -46,6 +46,9 @@ dependencies:
   # Local storage
   shared_preferences: ^2.2.2
 
+  # Image picker
+  image_picker: ^1.0.7
+
   # JSON serialization
   json_annotation: ^4.8.1
   freezed_annotation: ^2.4.1

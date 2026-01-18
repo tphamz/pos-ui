@@ -84,7 +84,7 @@ class _OTPVerificationScreenState
           );
 
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/home');
+        Navigator.of(context).pushReplacementNamed('/pos');
       }
     } catch (e) {
       if (mounted) {
