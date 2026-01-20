@@ -24,6 +24,7 @@ _$OrderImpl _$$OrderImplFromJson(Map<String, dynamic> json) => _$OrderImpl(
   payments: (json['payments'] as List<dynamic>?)
       ?.map((e) => Payment.fromJson(e as Map<String, dynamic>))
       .toList(),
+  version: (json['version'] as num?)?.toInt() ?? 1,
   createdAt: json['createdAt'] == null
       ? null
       : DateTime.parse(json['createdAt'] as String),
@@ -50,6 +51,7 @@ Map<String, dynamic> _$$OrderImplToJson(_$OrderImpl instance) =>
       'notes': instance.notes,
       'items': instance.items,
       'payments': instance.payments,
+      'version': instance.version,
       'createdAt': instance.createdAt?.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
       'completedAt': instance.completedAt?.toIso8601String(),

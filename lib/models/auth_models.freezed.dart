@@ -1036,7 +1036,7 @@ mixin _$SignUpRequest {
   @JsonKey(name: 'business_name')
   String get businessName => throw _privateConstructorUsedError;
   @JsonKey(name: 'blueprint_id')
-  String? get blueprintId => throw _privateConstructorUsedError;
+  String get blueprintId => throw _privateConstructorUsedError;
 
   /// Serializes this SignUpRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -1061,7 +1061,7 @@ abstract class $SignUpRequestCopyWith<$Res> {
     @JsonKey(name: 'email') String? email,
     @JsonKey(name: 'password') String? password,
     @JsonKey(name: 'business_name') String businessName,
-    @JsonKey(name: 'blueprint_id') String? blueprintId,
+    @JsonKey(name: 'blueprint_id') String blueprintId,
   });
 }
 
@@ -1085,7 +1085,7 @@ class _$SignUpRequestCopyWithImpl<$Res, $Val extends SignUpRequest>
     Object? email = freezed,
     Object? password = freezed,
     Object? businessName = null,
-    Object? blueprintId = freezed,
+    Object? blueprintId = null,
   }) {
     return _then(
       _value.copyWith(
@@ -1109,10 +1109,10 @@ class _$SignUpRequestCopyWithImpl<$Res, $Val extends SignUpRequest>
                 ? _value.businessName
                 : businessName // ignore: cast_nullable_to_non_nullable
                       as String,
-            blueprintId: freezed == blueprintId
+            blueprintId: null == blueprintId
                 ? _value.blueprintId
                 : blueprintId // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as String,
           )
           as $Val,
     );
@@ -1134,7 +1134,7 @@ abstract class _$$SignUpRequestImplCopyWith<$Res>
     @JsonKey(name: 'email') String? email,
     @JsonKey(name: 'password') String? password,
     @JsonKey(name: 'business_name') String businessName,
-    @JsonKey(name: 'blueprint_id') String? blueprintId,
+    @JsonKey(name: 'blueprint_id') String blueprintId,
   });
 }
 
@@ -1157,7 +1157,7 @@ class __$$SignUpRequestImplCopyWithImpl<$Res>
     Object? email = freezed,
     Object? password = freezed,
     Object? businessName = null,
-    Object? blueprintId = freezed,
+    Object? blueprintId = null,
   }) {
     return _then(
       _$SignUpRequestImpl(
@@ -1181,10 +1181,10 @@ class __$$SignUpRequestImplCopyWithImpl<$Res>
             ? _value.businessName
             : businessName // ignore: cast_nullable_to_non_nullable
                   as String,
-        blueprintId: freezed == blueprintId
+        blueprintId: null == blueprintId
             ? _value.blueprintId
             : blueprintId // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as String,
       ),
     );
   }
@@ -1199,7 +1199,7 @@ class _$SignUpRequestImpl implements _SignUpRequest {
     @JsonKey(name: 'email') this.email,
     @JsonKey(name: 'password') this.password,
     @JsonKey(name: 'business_name') required this.businessName,
-    @JsonKey(name: 'blueprint_id') this.blueprintId,
+    @JsonKey(name: 'blueprint_id') required this.blueprintId,
   });
 
   factory _$SignUpRequestImpl.fromJson(Map<String, dynamic> json) =>
@@ -1222,7 +1222,7 @@ class _$SignUpRequestImpl implements _SignUpRequest {
   final String businessName;
   @override
   @JsonKey(name: 'blueprint_id')
-  final String? blueprintId;
+  final String blueprintId;
 
   @override
   String toString() {
@@ -1280,7 +1280,7 @@ abstract class _SignUpRequest implements SignUpRequest {
     @JsonKey(name: 'email') final String? email,
     @JsonKey(name: 'password') final String? password,
     @JsonKey(name: 'business_name') required final String businessName,
-    @JsonKey(name: 'blueprint_id') final String? blueprintId,
+    @JsonKey(name: 'blueprint_id') required final String blueprintId,
   }) = _$SignUpRequestImpl;
 
   factory _SignUpRequest.fromJson(Map<String, dynamic> json) =
@@ -1303,7 +1303,7 @@ abstract class _SignUpRequest implements SignUpRequest {
   String get businessName;
   @override
   @JsonKey(name: 'blueprint_id')
-  String? get blueprintId;
+  String get blueprintId;
 
   /// Create a copy of SignUpRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -2131,6 +2131,8 @@ mixin _$User {
   String? get email => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_verified')
   bool get isVerified => throw _privateConstructorUsedError;
+  @JsonKey(name: 'version')
+  int get version => throw _privateConstructorUsedError; // Optimistic locking version
   @JsonKey(name: 'created_at')
   DateTime get createdAt => throw _privateConstructorUsedError;
 
@@ -2154,6 +2156,7 @@ abstract class $UserCopyWith<$Res> {
     @JsonKey(name: 'phone_number') String? phoneNumber,
     @JsonKey(name: 'email') String? email,
     @JsonKey(name: 'is_verified') bool isVerified,
+    @JsonKey(name: 'version') int version,
     @JsonKey(name: 'created_at') DateTime createdAt,
   });
 }
@@ -2178,6 +2181,7 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
     Object? phoneNumber = freezed,
     Object? email = freezed,
     Object? isVerified = null,
+    Object? version = null,
     Object? createdAt = null,
   }) {
     return _then(
@@ -2202,6 +2206,10 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
                 ? _value.isVerified
                 : isVerified // ignore: cast_nullable_to_non_nullable
                       as bool,
+            version: null == version
+                ? _value.version
+                : version // ignore: cast_nullable_to_non_nullable
+                      as int,
             createdAt: null == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -2226,6 +2234,7 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
     @JsonKey(name: 'phone_number') String? phoneNumber,
     @JsonKey(name: 'email') String? email,
     @JsonKey(name: 'is_verified') bool isVerified,
+    @JsonKey(name: 'version') int version,
     @JsonKey(name: 'created_at') DateTime createdAt,
   });
 }
@@ -2247,6 +2256,7 @@ class __$$UserImplCopyWithImpl<$Res>
     Object? phoneNumber = freezed,
     Object? email = freezed,
     Object? isVerified = null,
+    Object? version = null,
     Object? createdAt = null,
   }) {
     return _then(
@@ -2271,6 +2281,10 @@ class __$$UserImplCopyWithImpl<$Res>
             ? _value.isVerified
             : isVerified // ignore: cast_nullable_to_non_nullable
                   as bool,
+        version: null == version
+            ? _value.version
+            : version // ignore: cast_nullable_to_non_nullable
+                  as int,
         createdAt: null == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -2289,6 +2303,7 @@ class _$UserImpl implements _User {
     @JsonKey(name: 'phone_number') this.phoneNumber,
     @JsonKey(name: 'email') this.email,
     @JsonKey(name: 'is_verified') required this.isVerified,
+    @JsonKey(name: 'version') this.version = 1,
     @JsonKey(name: 'created_at') required this.createdAt,
   });
 
@@ -2311,12 +2326,16 @@ class _$UserImpl implements _User {
   @JsonKey(name: 'is_verified')
   final bool isVerified;
   @override
+  @JsonKey(name: 'version')
+  final int version;
+  // Optimistic locking version
+  @override
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
 
   @override
   String toString() {
-    return 'User(id: $id, fullName: $fullName, phoneNumber: $phoneNumber, email: $email, isVerified: $isVerified, createdAt: $createdAt)';
+    return 'User(id: $id, fullName: $fullName, phoneNumber: $phoneNumber, email: $email, isVerified: $isVerified, version: $version, createdAt: $createdAt)';
   }
 
   @override
@@ -2332,6 +2351,7 @@ class _$UserImpl implements _User {
             (identical(other.email, email) || other.email == email) &&
             (identical(other.isVerified, isVerified) ||
                 other.isVerified == isVerified) &&
+            (identical(other.version, version) || other.version == version) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
@@ -2345,6 +2365,7 @@ class _$UserImpl implements _User {
     phoneNumber,
     email,
     isVerified,
+    version,
     createdAt,
   );
 
@@ -2369,6 +2390,7 @@ abstract class _User implements User {
     @JsonKey(name: 'phone_number') final String? phoneNumber,
     @JsonKey(name: 'email') final String? email,
     @JsonKey(name: 'is_verified') required final bool isVerified,
+    @JsonKey(name: 'version') final int version,
     @JsonKey(name: 'created_at') required final DateTime createdAt,
   }) = _$UserImpl;
 
@@ -2389,6 +2411,9 @@ abstract class _User implements User {
   @override
   @JsonKey(name: 'is_verified')
   bool get isVerified;
+  @override
+  @JsonKey(name: 'version')
+  int get version; // Optimistic locking version
   @override
   @JsonKey(name: 'created_at')
   DateTime get createdAt;
@@ -2598,5 +2623,640 @@ abstract class _SignUpResponse implements SignUpResponse {
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$SignUpResponseImplCopyWith<_$SignUpResponseImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+AssignBusinessRoleRequest _$AssignBusinessRoleRequestFromJson(
+  Map<String, dynamic> json,
+) {
+  return _AssignBusinessRoleRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$AssignBusinessRoleRequest {
+  @JsonKey(name: 'full_name')
+  String get fullName => throw _privateConstructorUsedError;
+  String get email => throw _privateConstructorUsedError;
+  @JsonKey(name: 'phone_number')
+  String get phoneNumber => throw _privateConstructorUsedError;
+  String get role => throw _privateConstructorUsedError;
+  String? get password => throw _privateConstructorUsedError;
+  @JsonKey(name: 'terminal_pin')
+  String? get terminalPin => throw _privateConstructorUsedError;
+
+  /// Serializes this AssignBusinessRoleRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of AssignBusinessRoleRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $AssignBusinessRoleRequestCopyWith<AssignBusinessRoleRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $AssignBusinessRoleRequestCopyWith<$Res> {
+  factory $AssignBusinessRoleRequestCopyWith(
+    AssignBusinessRoleRequest value,
+    $Res Function(AssignBusinessRoleRequest) then,
+  ) = _$AssignBusinessRoleRequestCopyWithImpl<$Res, AssignBusinessRoleRequest>;
+  @useResult
+  $Res call({
+    @JsonKey(name: 'full_name') String fullName,
+    String email,
+    @JsonKey(name: 'phone_number') String phoneNumber,
+    String role,
+    String? password,
+    @JsonKey(name: 'terminal_pin') String? terminalPin,
+  });
+}
+
+/// @nodoc
+class _$AssignBusinessRoleRequestCopyWithImpl<
+  $Res,
+  $Val extends AssignBusinessRoleRequest
+>
+    implements $AssignBusinessRoleRequestCopyWith<$Res> {
+  _$AssignBusinessRoleRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of AssignBusinessRoleRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? fullName = null,
+    Object? email = null,
+    Object? phoneNumber = null,
+    Object? role = null,
+    Object? password = freezed,
+    Object? terminalPin = freezed,
+  }) {
+    return _then(
+      _value.copyWith(
+            fullName: null == fullName
+                ? _value.fullName
+                : fullName // ignore: cast_nullable_to_non_nullable
+                      as String,
+            email: null == email
+                ? _value.email
+                : email // ignore: cast_nullable_to_non_nullable
+                      as String,
+            phoneNumber: null == phoneNumber
+                ? _value.phoneNumber
+                : phoneNumber // ignore: cast_nullable_to_non_nullable
+                      as String,
+            role: null == role
+                ? _value.role
+                : role // ignore: cast_nullable_to_non_nullable
+                      as String,
+            password: freezed == password
+                ? _value.password
+                : password // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            terminalPin: freezed == terminalPin
+                ? _value.terminalPin
+                : terminalPin // ignore: cast_nullable_to_non_nullable
+                      as String?,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$AssignBusinessRoleRequestImplCopyWith<$Res>
+    implements $AssignBusinessRoleRequestCopyWith<$Res> {
+  factory _$$AssignBusinessRoleRequestImplCopyWith(
+    _$AssignBusinessRoleRequestImpl value,
+    $Res Function(_$AssignBusinessRoleRequestImpl) then,
+  ) = __$$AssignBusinessRoleRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    @JsonKey(name: 'full_name') String fullName,
+    String email,
+    @JsonKey(name: 'phone_number') String phoneNumber,
+    String role,
+    String? password,
+    @JsonKey(name: 'terminal_pin') String? terminalPin,
+  });
+}
+
+/// @nodoc
+class __$$AssignBusinessRoleRequestImplCopyWithImpl<$Res>
+    extends
+        _$AssignBusinessRoleRequestCopyWithImpl<
+          $Res,
+          _$AssignBusinessRoleRequestImpl
+        >
+    implements _$$AssignBusinessRoleRequestImplCopyWith<$Res> {
+  __$$AssignBusinessRoleRequestImplCopyWithImpl(
+    _$AssignBusinessRoleRequestImpl _value,
+    $Res Function(_$AssignBusinessRoleRequestImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of AssignBusinessRoleRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? fullName = null,
+    Object? email = null,
+    Object? phoneNumber = null,
+    Object? role = null,
+    Object? password = freezed,
+    Object? terminalPin = freezed,
+  }) {
+    return _then(
+      _$AssignBusinessRoleRequestImpl(
+        fullName: null == fullName
+            ? _value.fullName
+            : fullName // ignore: cast_nullable_to_non_nullable
+                  as String,
+        email: null == email
+            ? _value.email
+            : email // ignore: cast_nullable_to_non_nullable
+                  as String,
+        phoneNumber: null == phoneNumber
+            ? _value.phoneNumber
+            : phoneNumber // ignore: cast_nullable_to_non_nullable
+                  as String,
+        role: null == role
+            ? _value.role
+            : role // ignore: cast_nullable_to_non_nullable
+                  as String,
+        password: freezed == password
+            ? _value.password
+            : password // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        terminalPin: freezed == terminalPin
+            ? _value.terminalPin
+            : terminalPin // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$AssignBusinessRoleRequestImpl implements _AssignBusinessRoleRequest {
+  const _$AssignBusinessRoleRequestImpl({
+    @JsonKey(name: 'full_name') required this.fullName,
+    required this.email,
+    @JsonKey(name: 'phone_number') required this.phoneNumber,
+    required this.role,
+    this.password,
+    @JsonKey(name: 'terminal_pin') this.terminalPin,
+  });
+
+  factory _$AssignBusinessRoleRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$AssignBusinessRoleRequestImplFromJson(json);
+
+  @override
+  @JsonKey(name: 'full_name')
+  final String fullName;
+  @override
+  final String email;
+  @override
+  @JsonKey(name: 'phone_number')
+  final String phoneNumber;
+  @override
+  final String role;
+  @override
+  final String? password;
+  @override
+  @JsonKey(name: 'terminal_pin')
+  final String? terminalPin;
+
+  @override
+  String toString() {
+    return 'AssignBusinessRoleRequest(fullName: $fullName, email: $email, phoneNumber: $phoneNumber, role: $role, password: $password, terminalPin: $terminalPin)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AssignBusinessRoleRequestImpl &&
+            (identical(other.fullName, fullName) ||
+                other.fullName == fullName) &&
+            (identical(other.email, email) || other.email == email) &&
+            (identical(other.phoneNumber, phoneNumber) ||
+                other.phoneNumber == phoneNumber) &&
+            (identical(other.role, role) || other.role == role) &&
+            (identical(other.password, password) ||
+                other.password == password) &&
+            (identical(other.terminalPin, terminalPin) ||
+                other.terminalPin == terminalPin));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    fullName,
+    email,
+    phoneNumber,
+    role,
+    password,
+    terminalPin,
+  );
+
+  /// Create a copy of AssignBusinessRoleRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AssignBusinessRoleRequestImplCopyWith<_$AssignBusinessRoleRequestImpl>
+  get copyWith =>
+      __$$AssignBusinessRoleRequestImplCopyWithImpl<
+        _$AssignBusinessRoleRequestImpl
+      >(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$AssignBusinessRoleRequestImplToJson(this);
+  }
+}
+
+abstract class _AssignBusinessRoleRequest implements AssignBusinessRoleRequest {
+  const factory _AssignBusinessRoleRequest({
+    @JsonKey(name: 'full_name') required final String fullName,
+    required final String email,
+    @JsonKey(name: 'phone_number') required final String phoneNumber,
+    required final String role,
+    final String? password,
+    @JsonKey(name: 'terminal_pin') final String? terminalPin,
+  }) = _$AssignBusinessRoleRequestImpl;
+
+  factory _AssignBusinessRoleRequest.fromJson(Map<String, dynamic> json) =
+      _$AssignBusinessRoleRequestImpl.fromJson;
+
+  @override
+  @JsonKey(name: 'full_name')
+  String get fullName;
+  @override
+  String get email;
+  @override
+  @JsonKey(name: 'phone_number')
+  String get phoneNumber;
+  @override
+  String get role;
+  @override
+  String? get password;
+  @override
+  @JsonKey(name: 'terminal_pin')
+  String? get terminalPin;
+
+  /// Create a copy of AssignBusinessRoleRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$AssignBusinessRoleRequestImplCopyWith<_$AssignBusinessRoleRequestImpl>
+  get copyWith => throw _privateConstructorUsedError;
+}
+
+UserBusinessRole _$UserBusinessRoleFromJson(Map<String, dynamic> json) {
+  return _UserBusinessRole.fromJson(json);
+}
+
+/// @nodoc
+mixin _$UserBusinessRole {
+  String get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'user_id')
+  String get userId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'business_id')
+  String get businessId => throw _privateConstructorUsedError;
+  String get role => throw _privateConstructorUsedError;
+  @JsonKey(name: 'terminal_pin')
+  String? get terminalPin => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_active')
+  bool get isActive => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at')
+  DateTime get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'updated_at')
+  DateTime get updatedAt => throw _privateConstructorUsedError;
+
+  /// Serializes this UserBusinessRole to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of UserBusinessRole
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $UserBusinessRoleCopyWith<UserBusinessRole> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $UserBusinessRoleCopyWith<$Res> {
+  factory $UserBusinessRoleCopyWith(
+    UserBusinessRole value,
+    $Res Function(UserBusinessRole) then,
+  ) = _$UserBusinessRoleCopyWithImpl<$Res, UserBusinessRole>;
+  @useResult
+  $Res call({
+    String id,
+    @JsonKey(name: 'user_id') String userId,
+    @JsonKey(name: 'business_id') String businessId,
+    String role,
+    @JsonKey(name: 'terminal_pin') String? terminalPin,
+    @JsonKey(name: 'is_active') bool isActive,
+    @JsonKey(name: 'created_at') DateTime createdAt,
+    @JsonKey(name: 'updated_at') DateTime updatedAt,
+  });
+}
+
+/// @nodoc
+class _$UserBusinessRoleCopyWithImpl<$Res, $Val extends UserBusinessRole>
+    implements $UserBusinessRoleCopyWith<$Res> {
+  _$UserBusinessRoleCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of UserBusinessRole
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? userId = null,
+    Object? businessId = null,
+    Object? role = null,
+    Object? terminalPin = freezed,
+    Object? isActive = null,
+    Object? createdAt = null,
+    Object? updatedAt = null,
+  }) {
+    return _then(
+      _value.copyWith(
+            id: null == id
+                ? _value.id
+                : id // ignore: cast_nullable_to_non_nullable
+                      as String,
+            userId: null == userId
+                ? _value.userId
+                : userId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            businessId: null == businessId
+                ? _value.businessId
+                : businessId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            role: null == role
+                ? _value.role
+                : role // ignore: cast_nullable_to_non_nullable
+                      as String,
+            terminalPin: freezed == terminalPin
+                ? _value.terminalPin
+                : terminalPin // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            isActive: null == isActive
+                ? _value.isActive
+                : isActive // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            createdAt: null == createdAt
+                ? _value.createdAt
+                : createdAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime,
+            updatedAt: null == updatedAt
+                ? _value.updatedAt
+                : updatedAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$UserBusinessRoleImplCopyWith<$Res>
+    implements $UserBusinessRoleCopyWith<$Res> {
+  factory _$$UserBusinessRoleImplCopyWith(
+    _$UserBusinessRoleImpl value,
+    $Res Function(_$UserBusinessRoleImpl) then,
+  ) = __$$UserBusinessRoleImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    String id,
+    @JsonKey(name: 'user_id') String userId,
+    @JsonKey(name: 'business_id') String businessId,
+    String role,
+    @JsonKey(name: 'terminal_pin') String? terminalPin,
+    @JsonKey(name: 'is_active') bool isActive,
+    @JsonKey(name: 'created_at') DateTime createdAt,
+    @JsonKey(name: 'updated_at') DateTime updatedAt,
+  });
+}
+
+/// @nodoc
+class __$$UserBusinessRoleImplCopyWithImpl<$Res>
+    extends _$UserBusinessRoleCopyWithImpl<$Res, _$UserBusinessRoleImpl>
+    implements _$$UserBusinessRoleImplCopyWith<$Res> {
+  __$$UserBusinessRoleImplCopyWithImpl(
+    _$UserBusinessRoleImpl _value,
+    $Res Function(_$UserBusinessRoleImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of UserBusinessRole
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? userId = null,
+    Object? businessId = null,
+    Object? role = null,
+    Object? terminalPin = freezed,
+    Object? isActive = null,
+    Object? createdAt = null,
+    Object? updatedAt = null,
+  }) {
+    return _then(
+      _$UserBusinessRoleImpl(
+        id: null == id
+            ? _value.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String,
+        userId: null == userId
+            ? _value.userId
+            : userId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        businessId: null == businessId
+            ? _value.businessId
+            : businessId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        role: null == role
+            ? _value.role
+            : role // ignore: cast_nullable_to_non_nullable
+                  as String,
+        terminalPin: freezed == terminalPin
+            ? _value.terminalPin
+            : terminalPin // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        isActive: null == isActive
+            ? _value.isActive
+            : isActive // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        createdAt: null == createdAt
+            ? _value.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        updatedAt: null == updatedAt
+            ? _value.updatedAt
+            : updatedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$UserBusinessRoleImpl implements _UserBusinessRole {
+  const _$UserBusinessRoleImpl({
+    required this.id,
+    @JsonKey(name: 'user_id') required this.userId,
+    @JsonKey(name: 'business_id') required this.businessId,
+    required this.role,
+    @JsonKey(name: 'terminal_pin') this.terminalPin,
+    @JsonKey(name: 'is_active') required this.isActive,
+    @JsonKey(name: 'created_at') required this.createdAt,
+    @JsonKey(name: 'updated_at') required this.updatedAt,
+  });
+
+  factory _$UserBusinessRoleImpl.fromJson(Map<String, dynamic> json) =>
+      _$$UserBusinessRoleImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  @JsonKey(name: 'user_id')
+  final String userId;
+  @override
+  @JsonKey(name: 'business_id')
+  final String businessId;
+  @override
+  final String role;
+  @override
+  @JsonKey(name: 'terminal_pin')
+  final String? terminalPin;
+  @override
+  @JsonKey(name: 'is_active')
+  final bool isActive;
+  @override
+  @JsonKey(name: 'created_at')
+  final DateTime createdAt;
+  @override
+  @JsonKey(name: 'updated_at')
+  final DateTime updatedAt;
+
+  @override
+  String toString() {
+    return 'UserBusinessRole(id: $id, userId: $userId, businessId: $businessId, role: $role, terminalPin: $terminalPin, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$UserBusinessRoleImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.userId, userId) || other.userId == userId) &&
+            (identical(other.businessId, businessId) ||
+                other.businessId == businessId) &&
+            (identical(other.role, role) || other.role == role) &&
+            (identical(other.terminalPin, terminalPin) ||
+                other.terminalPin == terminalPin) &&
+            (identical(other.isActive, isActive) ||
+                other.isActive == isActive) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    userId,
+    businessId,
+    role,
+    terminalPin,
+    isActive,
+    createdAt,
+    updatedAt,
+  );
+
+  /// Create a copy of UserBusinessRole
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$UserBusinessRoleImplCopyWith<_$UserBusinessRoleImpl> get copyWith =>
+      __$$UserBusinessRoleImplCopyWithImpl<_$UserBusinessRoleImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$UserBusinessRoleImplToJson(this);
+  }
+}
+
+abstract class _UserBusinessRole implements UserBusinessRole {
+  const factory _UserBusinessRole({
+    required final String id,
+    @JsonKey(name: 'user_id') required final String userId,
+    @JsonKey(name: 'business_id') required final String businessId,
+    required final String role,
+    @JsonKey(name: 'terminal_pin') final String? terminalPin,
+    @JsonKey(name: 'is_active') required final bool isActive,
+    @JsonKey(name: 'created_at') required final DateTime createdAt,
+    @JsonKey(name: 'updated_at') required final DateTime updatedAt,
+  }) = _$UserBusinessRoleImpl;
+
+  factory _UserBusinessRole.fromJson(Map<String, dynamic> json) =
+      _$UserBusinessRoleImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  @JsonKey(name: 'user_id')
+  String get userId;
+  @override
+  @JsonKey(name: 'business_id')
+  String get businessId;
+  @override
+  String get role;
+  @override
+  @JsonKey(name: 'terminal_pin')
+  String? get terminalPin;
+  @override
+  @JsonKey(name: 'is_active')
+  bool get isActive;
+  @override
+  @JsonKey(name: 'created_at')
+  DateTime get createdAt;
+  @override
+  @JsonKey(name: 'updated_at')
+  DateTime get updatedAt;
+
+  /// Create a copy of UserBusinessRole
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$UserBusinessRoleImplCopyWith<_$UserBusinessRoleImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

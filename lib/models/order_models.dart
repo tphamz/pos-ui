@@ -19,6 +19,7 @@ class Order with _$Order {
     String? notes,
     required List<OrderItem> items,
     List<Payment>? payments,
+    @Default(1) int version, // Optimistic locking version
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? completedAt,

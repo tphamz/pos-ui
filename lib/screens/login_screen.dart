@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import '../utils/validation.dart';
+import '../utils/snackbar_helper.dart';
 import 'otp_verification_screen.dart';
 import 'signup_screen.dart';
 
@@ -75,9 +76,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProv
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        showErrorSnackBar(context, e.toString());
       }
     }
   }
@@ -93,14 +92,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProv
       await ref.read(authProvider.notifier).login(contact, password, storeCode: storeCode);
       
       if (mounted) {
-        // Navigation will be handled by the main app based on auth state
-        Navigator.of(context).pushReplacementNamed('/home');
+        // Navigate to POS screen after successful login
+        Navigator.of(context).pushReplacementNamed('/pos');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        showErrorSnackBar(context, e.toString());
       }
     }
   }

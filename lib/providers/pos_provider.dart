@@ -4,6 +4,8 @@ import '../models/pos/ticket.dart';
 import '../models/pos/staff.dart';
 import '../models/pos/table.dart';
 import '../services/ticket_service.dart';
+import 'entity_providers.dart';
+import 'auth_provider.dart';
 
 /// POS State containing all POS-related data
 class POSState {
@@ -42,35 +44,98 @@ class POSState {
 
 /// POS Notifier managing POS state
 class POSNotifier extends StateNotifier<POSState> {
-  POSNotifier() : super(POSState()) {
-    _initializeMockData();
+  final Ref _ref;
+
+  POSNotifier(this._ref) : super(POSState()) {
+    _loadTickets();
+    _loadStaff();
   }
 
-  void _initializeMockData() {
-    // Mock staff
-    final mockStaff = [
-      Staff(id: '1', name: 'John Doe', role: 'Stylist', isActive: true),
-      Staff(id: '2', name: 'Jane Smith', role: 'Colorist', isActive: true),
-      Staff(id: '3', name: 'Bob Johnson', role: 'Manager', isActive: false),
-      Staff(id: '4', name: 'Alice Brown', role: 'Stylist', isActive: true),
-      Staff(id: '5', name: 'Charlie Wilson', role: 'Assistant', isActive: true),
-    ];
+  /// Load tickets from local DB on init
+  Future<void> _loadTickets() async {
+    final authState = _ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+    
+    if (businessId == null) {
+      // No business ID available yet, tickets will be empty
+      return;
+    }
 
-    // Mock tables
-    final mockTables = List.generate(12, (index) {
-      return Table(
-        id: '${index + 1}',
-        number: '${index + 1}',
-        capacity: 4,
-        status: index % 3 == 0 ? 'occupied' : 'available',
+    try {
+      final entityService = _ref.read(entityServiceProvider(businessId));
+      final ticketsData = await entityService.get('ticket');
+      final tickets = ticketsData.map((data) => Ticket.fromJson(data)).toList();
+      
+      // Always update state, even if empty (to clear old data after restore)
+      state = state.copyWith(tickets: tickets);
+    } catch (e) {
+      // Silently fail - will work with in-memory tickets
+      print('Error loading tickets from local DB: $e');
+    }
+  }
+
+  /// Load staff from local DB on init
+  Future<void> _loadStaff() async {
+    final authState = _ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+    
+    if (businessId == null) {
+      // No business ID available yet, staff will be empty
+      return;
+    }
+
+    try {
+      final entityService = _ref.read(entityServiceProvider(businessId));
+      final staffData = await entityService.get('staff');
+      final staff = staffData.map((data) {
+        return Staff(
+          id: data['id'] as String,
+          fullName: data['full_name'] as String? ?? data['name'] as String? ?? '',
+          role: data['role'] as String? ?? 'staff',
+          isActive: data['is_active'] as bool? ?? data['isActive'] as bool? ?? true,
+        );
+      }).toList();
+      
+      // Always update state, even if empty (to clear old data after restore)
+      state = state.copyWith(staff: staff);
+    } catch (e) {
+      // Silently fail - will work with empty staff list
+      print('Error loading staff from local DB: $e');
+    }
+  }
+
+  /// Refresh all data from local DB (called after restore/sync)
+  Future<void> refresh() async {
+    await Future.wait([
+      _loadTickets(),
+      _loadStaff(),
+    ]);
+  }
+
+  /// Helper to save ticket to local DB
+  Future<void> _saveTicketToLocalDB(Ticket ticket, {bool isCreate = false}) async {
+    final authState = _ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+    
+    if (businessId == null) {
+      // No business ID available, skip saving
+      return;
+    }
+
+    try {
+      final entityService = _ref.read(entityServiceProvider(businessId));
+      await entityService.save(
+        resourceName: 'ticket',
+        id: ticket.id,
+        data: ticket.toJson(),
+        isCreate: isCreate,
       );
-    });
-
-    state = state.copyWith(
-      staff: mockStaff,
-      tables: mockTables,
-    );
+    } catch (e) {
+      // Silently fail - offline saving is best effort
+      print('Error saving ticket to local DB: $e');
+    }
   }
+
 
   void setBusinessType(BusinessType type) {
     state = state.copyWith(businessType: type);
@@ -94,13 +159,19 @@ class POSNotifier extends StateNotifier<POSState> {
       currentTicket: () => newTicket,
     );
 
+    // Save to local DB asynchronously (non-blocking)
+    _saveTicketToLocalDB(newTicket, isCreate: true);
+
     return newTicket;
   }
 
   void assignStaffToTicket(String ticketId, Staff staff) {
     final tickets = state.tickets.map((t) {
       if (t.id == ticketId) {
-        return t.copyWith(assigneeId: staff.id);
+        final updated = t.copyWith(assigneeId: staff.id);
+        // Save to local DB asynchronously (non-blocking)
+        _saveTicketToLocalDB(updated, isCreate: false);
+        return updated;
       }
       return t;
     }).toList();
@@ -118,7 +189,10 @@ class POSNotifier extends StateNotifier<POSState> {
   void assignTableToTicket(String ticketId, String tableNumber) {
     final tickets = state.tickets.map((t) {
       if (t.id == ticketId) {
-        return t.copyWith(tableNumber: tableNumber);
+        final updated = t.copyWith(tableNumber: tableNumber);
+        // Save to local DB asynchronously (non-blocking)
+        _saveTicketToLocalDB(updated, isCreate: false);
+        return updated;
       }
       return t;
     }).toList();
@@ -138,15 +212,19 @@ class POSNotifier extends StateNotifier<POSState> {
       if (t.id == ticketId) {
         // Check if item already exists, then update quantity
         final existingItemIndex = t.items.indexWhere((i) => i.productId == item.productId);
+        Ticket updated;
         if (existingItemIndex != -1) {
           final updatedItems = List<TicketItem>.from(t.items);
           updatedItems[existingItemIndex] = updatedItems[existingItemIndex].copyWith(
             quantity: updatedItems[existingItemIndex].quantity + item.quantity,
           );
-          return t.copyWith(items: updatedItems);
+          updated = t.copyWith(items: updatedItems);
         } else {
-          return t.copyWith(items: [...t.items, item]);
+          updated = t.copyWith(items: [...t.items, item]);
         }
+        // Save to local DB asynchronously (non-blocking)
+        _saveTicketToLocalDB(updated, isCreate: false);
+        return updated;
       }
       return t;
     }).toList();
@@ -164,7 +242,10 @@ class POSNotifier extends StateNotifier<POSState> {
   void removeItemFromTicket(String ticketId, String itemId) {
     final tickets = state.tickets.map((t) {
       if (t.id == ticketId) {
-        return t.copyWith(items: t.items.where((i) => i.id != itemId).toList());
+        final updated = t.copyWith(items: t.items.where((i) => i.id != itemId).toList());
+        // Save to local DB asynchronously (non-blocking)
+        _saveTicketToLocalDB(updated, isCreate: false);
+        return updated;
       }
       return t;
     }).toList();
@@ -188,7 +269,7 @@ class POSNotifier extends StateNotifier<POSState> {
 
     final tickets = state.tickets.map((t) {
       if (t.id == ticketId) {
-        return t.copyWith(
+        final updated = t.copyWith(
           items: t.items.map((i) {
             if (i.id == itemId) {
               return i.copyWith(quantity: quantity);
@@ -196,6 +277,9 @@ class POSNotifier extends StateNotifier<POSState> {
             return i;
           }).toList(),
         );
+        // Save to local DB asynchronously (non-blocking)
+        _saveTicketToLocalDB(updated, isCreate: false);
+        return updated;
       }
       return t;
     }).toList();
@@ -222,7 +306,7 @@ class POSNotifier extends StateNotifier<POSState> {
 
     final tickets = state.tickets.map((t) {
       if (t.id == ticketId) {
-        return t.copyWith(
+        final updated = t.copyWith(
           items: t.items.map((i) {
             if (i.id == itemId) {
               return i.copyWith(discount: clampedDiscount);
@@ -230,6 +314,9 @@ class POSNotifier extends StateNotifier<POSState> {
             return i;
           }).toList(),
         );
+        // Save to local DB asynchronously (non-blocking)
+        _saveTicketToLocalDB(updated, isCreate: false);
+        return updated;
       }
       return t;
     }).toList();
@@ -292,7 +379,10 @@ class POSNotifier extends StateNotifier<POSState> {
   void closeTicketAsPaid(String ticketId) {
     final tickets = state.tickets.map((t) {
       if (t.id == ticketId) {
-        return t.copyWith(status: 'paid');
+        final updated = t.copyWith(status: 'paid');
+        // Save to local DB asynchronously (non-blocking)
+        _saveTicketToLocalDB(updated, isCreate: false);
+        return updated;
       }
       return t;
     }).toList();
@@ -308,7 +398,21 @@ class POSNotifier extends StateNotifier<POSState> {
     );
   }
 
-  void deleteTicket(String ticketId) {
+  void deleteTicket(String ticketId) async {
+    final authState = _ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+
+    // Delete from local DB asynchronously (non-blocking)
+    if (businessId != null) {
+      try {
+        final entityService = _ref.read(entityServiceProvider(businessId));
+        await entityService.delete('ticket', ticketId);
+      } catch (e) {
+        // Silently fail - offline deletion is best effort
+        print('Error deleting ticket from local DB: $e');
+      }
+    }
+
     final tickets = state.tickets.where((t) => t.id != ticketId).toList();
 
     // Clear current ticket if it's the one being deleted
@@ -324,5 +428,5 @@ class POSNotifier extends StateNotifier<POSState> {
 }
 
 final posProvider = StateNotifierProvider<POSNotifier, POSState>((ref) {
-  return POSNotifier();
+  return POSNotifier(ref);
 });

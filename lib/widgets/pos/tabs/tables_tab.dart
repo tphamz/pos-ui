@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/edit_mode_provider.dart';
 import '../../../providers/pos_provider.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/blueprint_provider.dart';
+import '../../../providers/entity_providers.dart';
+import '../../../utils/snackbar_helper.dart';
 
 /// Tables/Stations/Registers tab
 class TablesTab extends ConsumerStatefulWidget {
@@ -12,19 +16,69 @@ class TablesTab extends ConsumerStatefulWidget {
 }
 
 class _TablesTabState extends ConsumerState<TablesTab> {
+  List<Map<String, dynamic>> _tables = [];
+  bool _isLoading = true;
 
-  // Mock data - will be replaced with actual data from backend
-  final List<Map<String, dynamic>> _tables = List.generate(12, (index) => {
-    'id': '${index + 1}',
-    'number': '${index + 1}',
-    'status': index % 3 == 0 ? 'occupied' : 'available',
-    'capacity': 4,
-  });
+  @override
+  void initState() {
+    super.initState();
+    _loadTables();
+  }
+
+  Future<void> _loadTables() async {
+    final authState = ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+    
+    if (businessId == null) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _tables = [];
+        });
+      }
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    try {
+      final entityService = ref.read(entityServiceProvider(businessId));
+      final tables = await entityService.get('table');
+      
+      if (mounted) {
+        setState(() {
+          _tables = tables;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _tables = [];
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final editMode = ref.watch(editModeProvider);
+    
+    // Get table label from blueprint
+    final labelMappings = ref.watch(labelMappingsProvider);
+    final tableLabel = (labelMappings['tables'] as String?) ?? 'Table';
+
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
 
     return Column(
       children: [
@@ -38,79 +92,162 @@ class _TablesTabState extends ConsumerState<TablesTab> {
                 ElevatedButton.icon(
                   onPressed: () => _showAddTableDialog(context),
                   icon: const Icon(Icons.add, size: 20),
-                  label: const Text('Add Table'),
+                  label: Text('Add $tableLabel'),
                 ),
               ],
             ),
           ),
-        // Tables grid
+        // Tables grid or empty state
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                childAspectRatio: 1.2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-              ),
-              itemCount: _tables.length,
-              itemBuilder: (context, index) {
-                final table = _tables[index];
-                final status = table['status'] as String;
-                final isAvailable = status == 'available';
+          child: _tables.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.table_restaurant_outlined,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No tables yet',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        editMode
+                            ? 'Tap "Add $tableLabel" to create your first $tableLabel'
+                            : 'Enable edit mode to add $tableLabel',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      childAspectRatio: 1.2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                    ),
+                    itemCount: _tables.length,
+                    itemBuilder: (context, index) {
+                      final table = _tables[index];
+                      final status = table['status'] as String;
+                      final isAvailable = status == 'available';
 
-                return _TableCard(
-                  table: table,
-                  isAvailable: isAvailable,
-                  onEdit: editMode ? () => _showEditTableDialog(context, table) : null,
-                  onDelete: editMode ? () => _showDeleteTableDialog(context, table) : null,
-                  onTap: () {
-                    // Select ticket for this table
-                    ref.read(posProvider.notifier).selectTicketByTable(table['number'] as String);
-                  },
-                );
-              },
-            ),
-          ),
+                      return _TableCard(
+                        table: table,
+                        isAvailable: isAvailable,
+                        onEdit: editMode ? () => _showEditTableDialog(context, table) : null,
+                        onDelete: editMode ? () => _showDeleteTableDialog(context, table) : null,
+                        onTap: () {
+                          // Select ticket for this table
+                          ref.read(posProvider.notifier).selectTicketByTable(table['number'] as String);
+                        },
+                      );
+                    },
+                  ),
+                ),
         ),
       ],
     );
   }
 
-  void _showAddTableDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => _TableDialog(
-        onSave: (table) {
-          setState(() {
-            _tables.add(table);
-          });
-          Navigator.of(context).pop();
-        },
-      ),
-    );
-  }
+  void _showAddTableDialog(BuildContext context) async {
+    final authState = ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+    if (businessId == null) return;
 
-  void _showEditTableDialog(BuildContext context, Map<String, dynamic> table) {
+    final labelMappings = ref.read(labelMappingsProvider);
+    final tableLabel = (labelMappings['tables'] as String?) ?? 'Table';
+
     showDialog(
       context: context,
       builder: (context) => _TableDialog(
-        table: table,
-        onSave: (updatedTable) {
-          setState(() {
-            final index = _tables.indexWhere((t) => t['id'] == table['id']);
-            if (index != -1) {
-              _tables[index] = updatedTable;
+        tableLabel: tableLabel,
+        onSave: (table) async {
+          try {
+            final entityService = ref.read(entityServiceProvider(businessId));
+            // Use generic save() - TableLocalRepository.execute() handles list manipulation
+            await entityService.save(
+              resourceName: 'table',
+              id: table['id'] as String? ?? table['number'] as String,
+              data: table,
+              isCreate: true,
+            );
+            setState(() {
+              _tables.add(table);
+            });
+            if (mounted) {
+              Navigator.of(context).pop();
             }
-          });
-          Navigator.of(context).pop();
+          } catch (e) {
+            if (mounted) {
+              showErrorSnackBar(context, 'Failed to add table: $e');
+            }
+          }
         },
       ),
     );
   }
 
-  void _showDeleteTableDialog(BuildContext context, Map<String, dynamic> table) {
+  void _showEditTableDialog(BuildContext context, Map<String, dynamic> table) async {
+    final labelMappings = ref.read(labelMappingsProvider);
+    final tableLabel = (labelMappings['tables'] as String?) ?? 'Table';
+    final authState = ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+    if (businessId == null) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => _TableDialog(
+        tableLabel: tableLabel,
+        table: table,
+        onSave: (updatedTable) async {
+          try {
+            final entityService = ref.read(entityServiceProvider(businessId));
+            final tableId = table['id'] as String;
+            // Use generic save() - TableLocalRepository.execute() handles list manipulation
+            await entityService.save(
+              resourceName: 'table',
+              id: tableId,
+              data: updatedTable,
+              isCreate: false,
+            );
+            setState(() {
+              final index = _tables.indexWhere((t) => t['id'] == table['id']);
+              if (index != -1) {
+                _tables[index] = updatedTable;
+              }
+            });
+            if (mounted) {
+              Navigator.of(context).pop();
+            }
+          } catch (e) {
+            if (mounted) {
+              showErrorSnackBar(context, 'Failed to update table: $e');
+            }
+          }
+        },
+      ),
+    );
+  }
+
+  void _showDeleteTableDialog(BuildContext context, Map<String, dynamic> table) async {
+    final authState = ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+    if (businessId == null) return;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -122,11 +259,23 @@ class _TablesTabState extends ConsumerState<TablesTab> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              setState(() {
-                _tables.removeWhere((t) => t['id'] == table['id']);
-              });
-              Navigator.of(context).pop();
+            onPressed: () async {
+              try {
+                final entityService = ref.read(entityServiceProvider(businessId));
+                final tableId = table['id'] as String;
+                // Use generic delete() - TableLocalRepository.execute() handles list manipulation
+                await entityService.delete('table', tableId);
+                setState(() {
+                  _tables.removeWhere((t) => t['id'] == table['id']);
+                });
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
+              } catch (e) {
+                if (mounted) {
+                  showErrorSnackBar(context, 'Failed to delete table: $e');
+                }
+              }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),
@@ -300,10 +449,12 @@ class _TableCard extends StatelessWidget {
 
 /// Dialog for adding/editing tables
 class _TableDialog extends StatefulWidget {
+  final String tableLabel;
   final Map<String, dynamic>? table;
   final Function(Map<String, dynamic>) onSave;
 
   const _TableDialog({
+    required this.tableLabel,
     this.table,
     required this.onSave,
   });
@@ -351,7 +502,7 @@ class _TableDialogState extends State<_TableDialog> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    isEdit ? 'Edit Table' : 'Add Table',
+                    isEdit ? 'Edit ${widget.tableLabel}' : 'Add ${widget.tableLabel}',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -367,9 +518,9 @@ class _TableDialogState extends State<_TableDialog> {
               // Number field
               TextFormField(
                 controller: _numberController,
-                decoration: const InputDecoration(
-                  labelText: 'Table Number *',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: '${widget.tableLabel} Number *',
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {

@@ -5,7 +5,11 @@ import 'dart:io';
 import '../../../theme/pos_theme.dart';
 import '../../../providers/edit_mode_provider.dart';
 import '../../../providers/pos_provider.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/blueprint_provider.dart';
 import '../../../models/pos/ticket.dart';
+import '../../../providers/entity_providers.dart';
+import '../../../utils/snackbar_helper.dart';
 
 /// Products tab
 class ProductsTab extends ConsumerStatefulWidget {
@@ -18,64 +22,97 @@ class ProductsTab extends ConsumerStatefulWidget {
 class _ProductsTabState extends ConsumerState<ProductsTab> {
   String _searchQuery = '';
   String? _selectedCategory;
+  List<Map<String, dynamic>> _products = [];
+  bool _isLoading = true;
 
-  // Mock data - will be replaced with actual data from backend
-  final List<Map<String, dynamic>> _categories = [
-    {'id': '1', 'name': 'All'},
-    {'id': '2', 'name': 'Haircuts'},
-    {'id': '3', 'name': 'Color'},
-    {'id': '4', 'name': 'Styling'},
-  ];
+  // Get unique categories from products (including "Add-ons")
+  // "Add-ons" will always be the last item in the list
+  List<String> get _categories {
+    final categories = <String>{};
+    String? addOnsCategory;
+    
+    for (final product in _products) {
+      final category = product['category']?.toString();
+      if (category != null && category.isNotEmpty) {
+        final categoryLower = category.toLowerCase();
+        if (categoryLower == 'add-ons' || categoryLower == 'add-ons') {
+          // Store the original casing of "Add-ons"
+          addOnsCategory = category;
+        } else {
+          categories.add(category);
+        }
+      }
+    }
+    
+    final sortedCategories = categories.toList()..sort();
+    
+    // Add "Add-ons" at the end if it exists
+    if (addOnsCategory != null) {
+      sortedCategories.add(addOnsCategory);
+    }
+    
+    return sortedCategories;
+  }
 
-    final List<Map<String, dynamic>> _products = [
-      {
-        'id': '1',
-        'name': 'Haircut',
-        'price': 25.00,
-        'category': 'Haircuts',
-        'duration': 30,
-        'image': null, // Can be replaced with image URL
-      },
-      {
-        'id': '2',
-        'name': 'Hair Color',
-        'price': 75.00,
-        'category': 'Color',
-        'duration': 120,
-        'image': null,
-      },
-      {
-        'id': '3',
-        'name': 'Blow Dry',
-        'price': 35.00,
-        'category': 'Styling',
-        'duration': 45,
-        'image': null,
-      },
-      {
-        'id': '4',
-        'name': 'Hair Mask',
-        'price': 15.00,
-        'category': 'Add-ons',
-        'duration': 15,
-        'image': null,
-      },
-      {
-        'id': '5',
-        'name': 'Deep Conditioning',
-        'price': 20.00,
-        'category': 'Add-ons',
-        'duration': 20,
-        'image': null,
-      },
-    ];
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    final authState = ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+    
+    if (businessId == null) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _products = [];
+        });
+      }
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    try {
+      final entityService = ref.read(entityServiceProvider(businessId));
+      final products = await entityService.get('product');
+      
+      if (mounted) {
+        setState(() {
+          _products = products.isNotEmpty ? products : [];
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      // On error, use empty list
+      if (mounted) {
+        setState(() {
+          _products = [];
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   List<Map<String, dynamic>> get _filteredProducts {
     return _products.where((product) {
       final category = product['category']?.toString().toLowerCase() ?? '';
       final isAddOn = category == 'add-ons';
-      // Exclude add-ons from regular products
-      if (isAddOn) return false;
+      
+      // If "Add-ons" category is selected, only show add-ons
+      if (_selectedCategory == 'Add-ons' || _selectedCategory == 'add-ons') {
+        if (!isAddOn) return false;
+      } else {
+        // Otherwise, exclude add-ons from regular products (they'll show in separate section)
+        if (isAddOn) return false;
+      }
       
       final matchesSearch = product['name']
           .toString()
@@ -89,6 +126,12 @@ class _ProductsTabState extends ConsumerState<ProductsTab> {
   }
 
   List<Map<String, dynamic>> get _filteredAddOns {
+    // Don't show add-ons in separate section if "Add-ons" category is selected
+    // (they'll be shown in the main grid instead)
+    if (_selectedCategory == 'Add-ons' || _selectedCategory == 'add-ons') {
+      return [];
+    }
+    
     return _products.where((product) {
       final category = product['category']?.toString().toLowerCase() ?? '';
       final isAddOn = category == 'add-ons';
@@ -104,11 +147,14 @@ class _ProductsTabState extends ConsumerState<ProductsTab> {
   }
 
   void _addProductToTicket(String ticketId, Map<String, dynamic> product) {
+    // Use base_price (matches server response and local DB column)
+    final priceValue = product['base_price'] ?? product['price']; // Fallback to price for backward compatibility
+    final price = priceValue != null ? (priceValue as num).toDouble() : 0.0;
     final ticketItem = TicketItem(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       productId: product['id'] as String,
       name: product['name'] as String,
-      price: product['price'] as double,
+      price: price,
       quantity: 1,
     );
     
@@ -119,6 +165,16 @@ class _ProductsTabState extends ConsumerState<ProductsTab> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final editMode = ref.watch(editModeProvider);
+    
+    // Get product label from blueprint
+    final labelMappings = ref.watch(labelMappingsProvider);
+    final productLabel = (labelMappings['products'] as String?) ?? 'Product';
+
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
 
     return Column(
       children: [
@@ -166,7 +222,7 @@ class _ProductsTabState extends ConsumerState<ProductsTab> {
                     _showAddProductDialog(context);
                   },
                   icon: const Icon(Icons.add, size: 20),
-                  label: const Text('Add Product'),
+                  label: Text('Add $productLabel'),
                 ),
               ],
             ],
@@ -189,17 +245,15 @@ class _ProductsTabState extends ConsumerState<ProductsTab> {
                   });
                 },
               ),
-              ..._categories
-                  .where((c) => c['name'] != 'All')
-                  .map((category) => _CategoryChip(
-                        label: category['name'] as String,
-                        isSelected: _selectedCategory == category['name'],
-                        onTap: () {
-                          setState(() {
-                            _selectedCategory = category['name'] as String;
-                          });
-                        },
-                      )),
+              ..._categories.map((category) => _CategoryChip(
+                    label: category,
+                    isSelected: _selectedCategory == category,
+                    onTap: () {
+                      setState(() {
+                        _selectedCategory = category;
+                      });
+                    },
+                  )),
             ],
           ),
         ),
@@ -333,39 +387,89 @@ class _ProductsTabState extends ConsumerState<ProductsTab> {
     );
   }
 
-  void _showAddProductDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => _ProductDialog(
-        onSave: (product) {
-          setState(() {
-            _products.add(product);
-          });
-          Navigator.of(context).pop();
-        },
-      ),
-    );
-  }
+  void _showAddProductDialog(BuildContext context) async {
+    final authState = ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+    if (businessId == null) return;
 
-  void _showEditProductDialog(BuildContext context, Map<String, dynamic> product) {
+    final labelMappings = ref.read(labelMappingsProvider);
+    final productLabel = (labelMappings['products'] as String?) ?? 'Product';
+
     showDialog(
       context: context,
       builder: (context) => _ProductDialog(
-        product: product,
-        onSave: (updatedProduct) {
-          setState(() {
-            final index = _products.indexWhere((p) => p['id'] == product['id']);
-            if (index != -1) {
-              _products[index] = updatedProduct;
+        productLabel: productLabel,
+        onSave: (product) async {
+          try {
+            final entityService = ref.read(entityServiceProvider(businessId));
+            final savedProduct = await entityService.save(
+              resourceName: 'product',
+              id: product['id'] as String,
+              data: product,
+              isCreate: true,
+            );
+            setState(() {
+              _products.add(savedProduct);
+            });
+            if (mounted) {
+              Navigator.of(context).pop();
             }
-          });
-          Navigator.of(context).pop();
+          } catch (e) {
+            if (mounted) {
+              showErrorSnackBar(context, 'Failed to save product: $e');
+            }
+          }
         },
       ),
     );
   }
 
-  void _showDeleteProductDialog(BuildContext context, Map<String, dynamic> product) {
+  void _showEditProductDialog(BuildContext context, Map<String, dynamic> product) async {
+    final authState = ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+    if (businessId == null) return;
+
+    final labelMappings = ref.read(labelMappingsProvider);
+    final productLabel = (labelMappings['products'] as String?) ?? 'Product';
+
+    showDialog(
+      context: context,
+      builder: (context) => _ProductDialog(
+        productLabel: productLabel,
+        product: product,
+        onSave: (updatedProduct) async {
+          try {
+            final entityService = ref.read(entityServiceProvider(businessId));
+            final savedProduct = await entityService.save(
+              resourceName: 'product',
+              id: product['id'] as String,
+              data: updatedProduct,
+              isCreate: false,
+            );
+            setState(() {
+              final index = _products.indexWhere((p) => p['id'] == product['id']);
+              if (index != -1) {
+                _products[index] = savedProduct;
+              }
+            });
+            if (mounted) {
+              Navigator.of(context).pop();
+            }
+          } catch (e) {
+            if (mounted) {
+              showErrorSnackBar(context, 'Failed to update product: $e');
+            }
+          }
+        },
+      ),
+    );
+  }
+
+  void _showDeleteProductDialog(BuildContext context, Map<String, dynamic> product) async {
+    final authState = ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+    if (businessId == null) return;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -377,11 +481,21 @@ class _ProductsTabState extends ConsumerState<ProductsTab> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              setState(() {
-                _products.removeWhere((p) => p['id'] == product['id']);
-              });
-              Navigator.of(context).pop();
+            onPressed: () async {
+              try {
+                final entityService = ref.read(entityServiceProvider(businessId));
+                await entityService.delete('product', product['id'] as String);
+                setState(() {
+                  _products.removeWhere((p) => p['id'] == product['id']);
+                });
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
+              } catch (e) {
+                if (mounted) {
+                  showErrorSnackBar(context, 'Failed to delete product: $e');
+                }
+              }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),
@@ -456,9 +570,15 @@ class _ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final price = product['price'] as double;
-    final duration = product['duration'] as int?;
-    final imageUrl = product['image'] as String?;
+    // Use base_price (matches server response and local DB column)
+    final priceValue = product['base_price'] ?? product['price']; // Fallback to price for backward compatibility
+    final price = priceValue != null ? (priceValue as num).toDouble() : 0.0;
+    // Extract duration and image from metadata
+    final metadata = product['metadata'] is Map<String, dynamic>
+        ? product['metadata'] as Map<String, dynamic>
+        : null;
+    final duration = metadata?['duration_minutes'] as int?;
+    final imageUrl = metadata?['image'] as String? ?? product['image'] as String?;
 
     return Card(
       child: InkWell(
@@ -680,8 +800,14 @@ class _AddOnCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final price = product['price'] as double;
-    final imageUrl = product['image'] as String?;
+    // Use base_price (matches server response and local DB column)
+    final priceValue = product['base_price'] ?? product['price']; // Fallback to price for backward compatibility
+    final price = priceValue != null ? (priceValue as num).toDouble() : 0.0;
+    // Extract image from metadata
+    final metadata = product['metadata'] is Map<String, dynamic>
+        ? product['metadata'] as Map<String, dynamic>
+        : null;
+    final imageUrl = metadata?['image'] as String? ?? product['image'] as String?;
 
     return Card(
       child: InkWell(
@@ -812,10 +938,12 @@ class _AddOnCard extends StatelessWidget {
 
 /// Dialog for adding/editing products
 class _ProductDialog extends StatefulWidget {
+  final String productLabel;
   final Map<String, dynamic>? product;
-  final Function(Map<String, dynamic>) onSave;
+  final Future<void> Function(Map<String, dynamic>) onSave;
 
   const _ProductDialog({
+    required this.productLabel,
     this.product,
     required this.onSave,
   });
@@ -834,16 +962,23 @@ class _ProductDialogState extends State<_ProductDialog> {
   String? _selectedCategory;
   File? _selectedImage;
   String? _imageUrl; // For existing image URL
+  String? _errorMessage; // For sticky error display
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.product?['name'] ?? '');
-    _priceController = TextEditingController(text: widget.product?['price']?.toString() ?? '');
+    _priceController = TextEditingController(text: (widget.product?['base_price'] ?? widget.product?['price'])?.toString() ?? '');
     _categoryController = TextEditingController(text: widget.product?['category'] ?? '');
-    _durationController = TextEditingController(text: widget.product?['duration']?.toString() ?? '');
+    // Extract duration and image from metadata if present
+    final metadataValue = widget.product?['metadata'];
+    final metadata = metadataValue is Map<String, dynamic>
+        ? metadataValue as Map<String, dynamic>
+        : null;
+    final durationFromMetadata = metadata?['duration_minutes'];
+    _durationController = TextEditingController(text: durationFromMetadata?.toString() ?? '');
     _selectedCategory = widget.product?['category'];
-    _imageUrl = widget.product?['image'] as String?;
+    _imageUrl = metadata?['image'] as String? ?? widget.product?['image'] as String?;
   }
 
   @override
@@ -871,9 +1006,9 @@ class _ProductDialogState extends State<_ProductDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error picking image: $e')),
-        );
+        setState(() {
+          _errorMessage = 'Error picking image: $e';
+        });
       }
     }
   }
@@ -886,18 +1021,18 @@ class _ProductDialogState extends State<_ProductDialog> {
     return Dialog(
       child: Container(
         width: 500,
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        constraints: const BoxConstraints(maxHeight: 800),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Fixed header
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    isEdit ? 'Edit Product' : 'Add Product',
+                    isEdit ? 'Edit ${widget.productLabel}' : 'Add ${widget.productLabel}',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -909,18 +1044,29 @@ class _ProductDialogState extends State<_ProductDialog> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-              // Image upload section
-              Text(
-                'Product Image',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-              ),
-              const SizedBox(height: 8),
-              GestureDetector(
+            ),
+            // Scrollable form content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 24),
+                      // Image upload section
+                      Text(
+                        'Product Image',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      GestureDetector(
                 onTap: _pickImage,
                 child: Container(
                   height: 200,
@@ -952,114 +1098,196 @@ class _ProductDialogState extends State<_ProductDialog> {
                               ),
                             )
                           : _buildImagePlaceholder(context, isDark),
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: _pickImage,
-                  icon: const Icon(Icons.upload, size: 18),
-                  label: Text(_selectedImage != null || _imageUrl != null 
-                      ? 'Change Image' 
-                      : 'Upload Image'),
-                ),
-              ),
-              const SizedBox(height: 24),
-              // Name field
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Product Name *',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a product name';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              // Price field
-              TextFormField(
-                controller: _priceController,
-                decoration: const InputDecoration(
-                  labelText: 'Price *',
-                  border: OutlineInputBorder(),
-                  prefixText: '\$ ',
-                ),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a price';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              // Category field
-              TextFormField(
-                controller: _categoryController,
-                decoration: const InputDecoration(
-                  labelText: 'Category *',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a category';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              // Duration field (optional)
-              TextFormField(
-                controller: _durationController,
-                decoration: const InputDecoration(
-                  labelText: 'Duration (minutes)',
-                  border: OutlineInputBorder(),
-                  helperText: 'Optional - for services',
-                ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 24),
-              // Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _pickImage,
+                          icon: const Icon(Icons.upload, size: 18),
+                          label: Text(_selectedImage != null || _imageUrl != null 
+                              ? 'Change Image' 
+                              : 'Upload Image'),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      // Name field
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Product Name *',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a product name';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      // Price field
+                      TextFormField(
+                        controller: _priceController,
+                        decoration: const InputDecoration(
+                          labelText: 'Price *',
+                          border: OutlineInputBorder(),
+                          prefixText: '\$ ',
+                        ),
+                        keyboardType: TextInputType.numberWithOptions(decimal: true),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a price';
+                          }
+                          if (double.tryParse(value) == null) {
+                            return 'Please enter a valid number';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      // Category field
+                      TextFormField(
+                        controller: _categoryController,
+                        decoration: const InputDecoration(
+                          labelText: 'Category *',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a category';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      // Duration field (optional)
+                      TextFormField(
+                        controller: _durationController,
+                        decoration: const InputDecoration(
+                          labelText: 'Duration (minutes)',
+                          border: OutlineInputBorder(),
+                          helperText: 'Optional - for services',
+                        ),
+                        keyboardType: TextInputType.number,
+                      ),
+                      const SizedBox(height: 24),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        final product = {
-                          'id': widget.product?['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
-                          'name': _nameController.text,
-                          'price': double.parse(_priceController.text),
-                          'category': _categoryController.text,
-                          'duration': _durationController.text.isNotEmpty 
-                              ? int.tryParse(_durationController.text) 
-                              : null,
-                          'image': _selectedImage != null 
-                              ? _selectedImage!.path // In real app, upload to server and get URL
-                              : _imageUrl,
-                        };
-                        widget.onSave(product);
-                      }
-                    },
-                    child: Text(isEdit ? 'Save' : 'Add'),
-                  ),
-                ],
+                ),
               ),
-            ],
-          ),
+            ),
+            // Fixed buttons with overlay error message
+            Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Cancel'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () async {
+                          // Clear any previous error
+                          setState(() {
+                            _errorMessage = null;
+                          });
+                          
+                          if (_formKey.currentState!.validate()) {
+                            try {
+                              // Build metadata object with duration and image
+                              final metadata = <String, dynamic>{};
+                              if (_durationController.text.isNotEmpty) {
+                                final duration = int.tryParse(_durationController.text);
+                                if (duration != null) {
+                                  metadata['duration_minutes'] = duration;
+                                }
+                              }
+                              if (_selectedImage != null || _imageUrl != null) {
+                                metadata['image'] = _selectedImage != null 
+                                    ? _selectedImage!.path // In real app, upload to server and get URL
+                                    : _imageUrl;
+                              }
+                              
+                              final product = {
+                                'id': widget.product?['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+                                'name': _nameController.text,
+                                'price': double.parse(_priceController.text),
+                                'category': _categoryController.text,
+                                'metadata': metadata.isNotEmpty ? metadata : null,
+                              };
+                              
+                              await widget.onSave(product);
+                            } catch (e) {
+                              if (mounted) {
+                                setState(() {
+                                  _errorMessage = 'Failed to save product: $e';
+                                });
+                              }
+                            }
+                          }
+                        },
+                        child: Text(isEdit ? 'Save' : 'Add'),
+                      ),
+                    ],
+                  ),
+                ),
+                // Overlay error message at bottom
+                if (_errorMessage != null)
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        border: Border(
+                          top: BorderSide(color: Colors.red.shade200, width: 1),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, -2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: TextStyle(
+                                color: Colors.red.shade700,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, size: 18),
+                            color: Colors.red.shade700,
+                            onPressed: () {
+                              setState(() {
+                                _errorMessage = null;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ),
       ),
     );

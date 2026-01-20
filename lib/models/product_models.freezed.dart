@@ -22,16 +22,26 @@ Product _$ProductFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$Product {
   String get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'business_id')
   String get businessId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'category')
   String? get categoryId => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String? get sku => throw _privateConstructorUsedError;
+  @JsonKey(name: 'base_price')
   double get basePrice => throw _privateConstructorUsedError;
+  @JsonKey(name: 'tax_rate')
   double get taxRate => throw _privateConstructorUsedError;
   Map<String, dynamic>? get metadata => throw _privateConstructorUsedError;
+  @JsonKey(name: 'is_active')
   bool get isActive => throw _privateConstructorUsedError;
+  @JsonKey(name: 'stock_quantity')
   int get stockQuantity => throw _privateConstructorUsedError;
+  int get version =>
+      throw _privateConstructorUsedError; // Optimistic locking version
+  @JsonKey(name: 'created_at')
   DateTime? get createdAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'updated_at')
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this Product to a JSON map.
@@ -50,17 +60,18 @@ abstract class $ProductCopyWith<$Res> {
   @useResult
   $Res call({
     String id,
-    String businessId,
-    String? categoryId,
+    @JsonKey(name: 'business_id') String businessId,
+    @JsonKey(name: 'category') String? categoryId,
     String name,
     String? sku,
-    double basePrice,
-    double taxRate,
+    @JsonKey(name: 'base_price') double basePrice,
+    @JsonKey(name: 'tax_rate') double taxRate,
     Map<String, dynamic>? metadata,
-    bool isActive,
-    int stockQuantity,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    @JsonKey(name: 'is_active') bool isActive,
+    @JsonKey(name: 'stock_quantity') int stockQuantity,
+    int version,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
   });
 }
 
@@ -89,6 +100,7 @@ class _$ProductCopyWithImpl<$Res, $Val extends Product>
     Object? metadata = freezed,
     Object? isActive = null,
     Object? stockQuantity = null,
+    Object? version = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -134,6 +146,10 @@ class _$ProductCopyWithImpl<$Res, $Val extends Product>
                 ? _value.stockQuantity
                 : stockQuantity // ignore: cast_nullable_to_non_nullable
                       as int,
+            version: null == version
+                ? _value.version
+                : version // ignore: cast_nullable_to_non_nullable
+                      as int,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -158,17 +174,18 @@ abstract class _$$ProductImplCopyWith<$Res> implements $ProductCopyWith<$Res> {
   @useResult
   $Res call({
     String id,
-    String businessId,
-    String? categoryId,
+    @JsonKey(name: 'business_id') String businessId,
+    @JsonKey(name: 'category') String? categoryId,
     String name,
     String? sku,
-    double basePrice,
-    double taxRate,
+    @JsonKey(name: 'base_price') double basePrice,
+    @JsonKey(name: 'tax_rate') double taxRate,
     Map<String, dynamic>? metadata,
-    bool isActive,
-    int stockQuantity,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    @JsonKey(name: 'is_active') bool isActive,
+    @JsonKey(name: 'stock_quantity') int stockQuantity,
+    int version,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
   });
 }
 
@@ -196,6 +213,7 @@ class __$$ProductImplCopyWithImpl<$Res>
     Object? metadata = freezed,
     Object? isActive = null,
     Object? stockQuantity = null,
+    Object? version = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -241,6 +259,10 @@ class __$$ProductImplCopyWithImpl<$Res>
             ? _value.stockQuantity
             : stockQuantity // ignore: cast_nullable_to_non_nullable
                   as int,
+        version: null == version
+            ? _value.version
+            : version // ignore: cast_nullable_to_non_nullable
+                  as int,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -259,17 +281,18 @@ class __$$ProductImplCopyWithImpl<$Res>
 class _$ProductImpl implements _Product {
   const _$ProductImpl({
     required this.id,
-    required this.businessId,
-    this.categoryId,
+    @JsonKey(name: 'business_id') required this.businessId,
+    @JsonKey(name: 'category') this.categoryId,
     required this.name,
     this.sku,
-    required this.basePrice,
-    required this.taxRate,
+    @JsonKey(name: 'base_price') required this.basePrice,
+    @JsonKey(name: 'tax_rate') required this.taxRate,
     final Map<String, dynamic>? metadata,
-    required this.isActive,
-    required this.stockQuantity,
-    this.createdAt,
-    this.updatedAt,
+    @JsonKey(name: 'is_active') required this.isActive,
+    @JsonKey(name: 'stock_quantity') required this.stockQuantity,
+    this.version = 1,
+    @JsonKey(name: 'created_at') this.createdAt,
+    @JsonKey(name: 'updated_at') this.updatedAt,
   }) : _metadata = metadata;
 
   factory _$ProductImpl.fromJson(Map<String, dynamic> json) =>
@@ -278,16 +301,20 @@ class _$ProductImpl implements _Product {
   @override
   final String id;
   @override
+  @JsonKey(name: 'business_id')
   final String businessId;
   @override
+  @JsonKey(name: 'category')
   final String? categoryId;
   @override
   final String name;
   @override
   final String? sku;
   @override
+  @JsonKey(name: 'base_price')
   final double basePrice;
   @override
+  @JsonKey(name: 'tax_rate')
   final double taxRate;
   final Map<String, dynamic>? _metadata;
   @override
@@ -300,17 +327,25 @@ class _$ProductImpl implements _Product {
   }
 
   @override
+  @JsonKey(name: 'is_active')
   final bool isActive;
   @override
+  @JsonKey(name: 'stock_quantity')
   final int stockQuantity;
   @override
+  @JsonKey()
+  final int version;
+  // Optimistic locking version
+  @override
+  @JsonKey(name: 'created_at')
   final DateTime? createdAt;
   @override
+  @JsonKey(name: 'updated_at')
   final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'Product(id: $id, businessId: $businessId, categoryId: $categoryId, name: $name, sku: $sku, basePrice: $basePrice, taxRate: $taxRate, metadata: $metadata, isActive: $isActive, stockQuantity: $stockQuantity, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Product(id: $id, businessId: $businessId, categoryId: $categoryId, name: $name, sku: $sku, basePrice: $basePrice, taxRate: $taxRate, metadata: $metadata, isActive: $isActive, stockQuantity: $stockQuantity, version: $version, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -333,6 +368,7 @@ class _$ProductImpl implements _Product {
                 other.isActive == isActive) &&
             (identical(other.stockQuantity, stockQuantity) ||
                 other.stockQuantity == stockQuantity) &&
+            (identical(other.version, version) || other.version == version) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -353,6 +389,7 @@ class _$ProductImpl implements _Product {
     const DeepCollectionEquality().hash(_metadata),
     isActive,
     stockQuantity,
+    version,
     createdAt,
     updatedAt,
   );
@@ -374,17 +411,18 @@ class _$ProductImpl implements _Product {
 abstract class _Product implements Product {
   const factory _Product({
     required final String id,
-    required final String businessId,
-    final String? categoryId,
+    @JsonKey(name: 'business_id') required final String businessId,
+    @JsonKey(name: 'category') final String? categoryId,
     required final String name,
     final String? sku,
-    required final double basePrice,
-    required final double taxRate,
+    @JsonKey(name: 'base_price') required final double basePrice,
+    @JsonKey(name: 'tax_rate') required final double taxRate,
     final Map<String, dynamic>? metadata,
-    required final bool isActive,
-    required final int stockQuantity,
-    final DateTime? createdAt,
-    final DateTime? updatedAt,
+    @JsonKey(name: 'is_active') required final bool isActive,
+    @JsonKey(name: 'stock_quantity') required final int stockQuantity,
+    final int version,
+    @JsonKey(name: 'created_at') final DateTime? createdAt,
+    @JsonKey(name: 'updated_at') final DateTime? updatedAt,
   }) = _$ProductImpl;
 
   factory _Product.fromJson(Map<String, dynamic> json) = _$ProductImpl.fromJson;
@@ -392,26 +430,36 @@ abstract class _Product implements Product {
   @override
   String get id;
   @override
+  @JsonKey(name: 'business_id')
   String get businessId;
   @override
+  @JsonKey(name: 'category')
   String? get categoryId;
   @override
   String get name;
   @override
   String? get sku;
   @override
+  @JsonKey(name: 'base_price')
   double get basePrice;
   @override
+  @JsonKey(name: 'tax_rate')
   double get taxRate;
   @override
   Map<String, dynamic>? get metadata;
   @override
+  @JsonKey(name: 'is_active')
   bool get isActive;
   @override
+  @JsonKey(name: 'stock_quantity')
   int get stockQuantity;
   @override
+  int get version; // Optimistic locking version
+  @override
+  @JsonKey(name: 'created_at')
   DateTime? get createdAt;
   @override
+  @JsonKey(name: 'updated_at')
   DateTime? get updatedAt;
 
   /// Create a copy of Product
@@ -1088,6 +1136,7 @@ mixin _$UpdateProductRequest {
   Map<String, dynamic>? get metadata => throw _privateConstructorUsedError;
   bool? get isActive => throw _privateConstructorUsedError;
   int? get stockQuantity => throw _privateConstructorUsedError;
+  int? get version => throw _privateConstructorUsedError;
 
   /// Serializes this UpdateProductRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -1115,6 +1164,7 @@ abstract class $UpdateProductRequestCopyWith<$Res> {
     Map<String, dynamic>? metadata,
     bool? isActive,
     int? stockQuantity,
+    int? version,
   });
 }
 
@@ -1144,6 +1194,7 @@ class _$UpdateProductRequestCopyWithImpl<
     Object? metadata = freezed,
     Object? isActive = freezed,
     Object? stockQuantity = freezed,
+    Object? version = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -1179,6 +1230,10 @@ class _$UpdateProductRequestCopyWithImpl<
                 ? _value.stockQuantity
                 : stockQuantity // ignore: cast_nullable_to_non_nullable
                       as int?,
+            version: freezed == version
+                ? _value.version
+                : version // ignore: cast_nullable_to_non_nullable
+                      as int?,
           )
           as $Val,
     );
@@ -1203,6 +1258,7 @@ abstract class _$$UpdateProductRequestImplCopyWith<$Res>
     Map<String, dynamic>? metadata,
     bool? isActive,
     int? stockQuantity,
+    int? version,
   });
 }
 
@@ -1228,6 +1284,7 @@ class __$$UpdateProductRequestImplCopyWithImpl<$Res>
     Object? metadata = freezed,
     Object? isActive = freezed,
     Object? stockQuantity = freezed,
+    Object? version = freezed,
   }) {
     return _then(
       _$UpdateProductRequestImpl(
@@ -1263,6 +1320,10 @@ class __$$UpdateProductRequestImplCopyWithImpl<$Res>
             ? _value.stockQuantity
             : stockQuantity // ignore: cast_nullable_to_non_nullable
                   as int?,
+        version: freezed == version
+            ? _value.version
+            : version // ignore: cast_nullable_to_non_nullable
+                  as int?,
       ),
     );
   }
@@ -1280,6 +1341,7 @@ class _$UpdateProductRequestImpl implements _UpdateProductRequest {
     final Map<String, dynamic>? metadata,
     this.isActive,
     this.stockQuantity,
+    this.version,
   }) : _metadata = metadata;
 
   factory _$UpdateProductRequestImpl.fromJson(Map<String, dynamic> json) =>
@@ -1309,10 +1371,12 @@ class _$UpdateProductRequestImpl implements _UpdateProductRequest {
   final bool? isActive;
   @override
   final int? stockQuantity;
+  @override
+  final int? version;
 
   @override
   String toString() {
-    return 'UpdateProductRequest(name: $name, categoryId: $categoryId, sku: $sku, basePrice: $basePrice, taxRate: $taxRate, metadata: $metadata, isActive: $isActive, stockQuantity: $stockQuantity)';
+    return 'UpdateProductRequest(name: $name, categoryId: $categoryId, sku: $sku, basePrice: $basePrice, taxRate: $taxRate, metadata: $metadata, isActive: $isActive, stockQuantity: $stockQuantity, version: $version)';
   }
 
   @override
@@ -1331,7 +1395,8 @@ class _$UpdateProductRequestImpl implements _UpdateProductRequest {
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
             (identical(other.stockQuantity, stockQuantity) ||
-                other.stockQuantity == stockQuantity));
+                other.stockQuantity == stockQuantity) &&
+            (identical(other.version, version) || other.version == version));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1346,6 +1411,7 @@ class _$UpdateProductRequestImpl implements _UpdateProductRequest {
     const DeepCollectionEquality().hash(_metadata),
     isActive,
     stockQuantity,
+    version,
   );
 
   /// Create a copy of UpdateProductRequest
@@ -1376,6 +1442,7 @@ abstract class _UpdateProductRequest implements UpdateProductRequest {
     final Map<String, dynamic>? metadata,
     final bool? isActive,
     final int? stockQuantity,
+    final int? version,
   }) = _$UpdateProductRequestImpl;
 
   factory _UpdateProductRequest.fromJson(Map<String, dynamic> json) =
@@ -1397,6 +1464,8 @@ abstract class _UpdateProductRequest implements UpdateProductRequest {
   bool? get isActive;
   @override
   int? get stockQuantity;
+  @override
+  int? get version;
 
   /// Create a copy of UpdateProductRequest
   /// with the given fields replaced by the non-null parameter values.

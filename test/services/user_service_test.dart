@@ -1,10 +1,15 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dio/dio.dart';
-import 'package:pos_mobile/models/auth_models.dart';
-import 'package:pos_mobile/services/user_service.dart';
-import 'package:pos_mobile/services/api_client.dart';
 import 'package:http_mock_adapter/http_mock_adapter.dart';
+import '../../lib/models/auth_models.dart';
+import '../../lib/services/user_service.dart';
+import '../../lib/services/api_client.dart';
+import '../../lib/services/entity_service.dart';
+import '../../lib/database/app_database.dart';
+import '../../lib/database/local_db_service.dart';
+import '../../lib/repositories/resources_registry.dart';
+import '../../lib/services/queue_service.dart';
 
 void main() {
   late Dio dio;
@@ -51,6 +56,7 @@ void main() {
           email: 'john@example.com',
           phoneNumber: '+17033443167',
           password: 'password123',
+          blueprintId: 'blueprint-123',
         );
 
         dioAdapter.onPost(
@@ -93,6 +99,7 @@ void main() {
           fullName: 'Jane Doe',
           businessName: 'Jane\'s Business',
           email: 'jane@example.com',
+          blueprintId: 'blueprint-123',
         );
 
         dioAdapter.onPost(
@@ -132,6 +139,7 @@ void main() {
           fullName: 'Bob Smith',
           businessName: 'Bob\'s Store',
           phoneNumber: '+17033443167',
+          blueprintId: 'blueprint-123',
         );
 
         dioAdapter.onPost(
@@ -171,6 +179,7 @@ void main() {
           fullName: 'John Doe',
           businessName: 'My Business',
           email: 'existing@example.com',
+          blueprintId: 'blueprint-123',
         );
 
         dioAdapter.onPost(
@@ -193,6 +202,7 @@ void main() {
           fullName: 'John Doe',
           businessName: 'My Business',
           email: 'john@example.com',
+          blueprintId: 'blueprint-123',
         );
 
         dioAdapter.onPost(

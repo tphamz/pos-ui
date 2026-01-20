@@ -4,6 +4,13 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../../providers/edit_mode_provider.dart';
 import '../../../providers/pos_provider.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../providers/blueprint_provider.dart';
+import '../../../providers/entity_providers.dart';
+import '../../../models/auth_models.dart';
+import '../../../models/blueprint_models.dart';
+import '../../../providers/api_providers.dart';
+import '../../../utils/snackbar_helper.dart';
 
 /// Staff tab
 class StaffTab extends ConsumerStatefulWidget {
@@ -14,50 +21,69 @@ class StaffTab extends ConsumerStatefulWidget {
 }
 
 class _StaffTabState extends ConsumerState<StaffTab> {
+  List<Map<String, dynamic>> _staff = [];
+  bool _isLoading = true;
 
-  // Mock data - will be replaced with actual data from backend
-  final List<Map<String, dynamic>> _staff = [
-      {
-        'id': '1',
-        'name': 'John Doe',
-        'role': 'Stylist',
-        'isActive': true,
-        'avatar': null, // Can be replaced with image URL
-      },
-      {
-        'id': '2',
-        'name': 'Jane Smith',
-        'role': 'Colorist',
-        'isActive': true,
-        'avatar': null,
-      },
-      {
-        'id': '3',
-        'name': 'Bob Johnson',
-        'role': 'Manager',
-        'isActive': false,
-        'avatar': null,
-      },
-      {
-        'id': '4',
-        'name': 'Alice Brown',
-        'role': 'Stylist',
-        'isActive': true,
-        'avatar': null,
-      },
-      {
-        'id': '5',
-        'name': 'Charlie Wilson',
-        'role': 'Assistant',
-        'isActive': true,
-        'avatar': null,
-      },
-    ];
+  @override
+  void initState() {
+    super.initState();
+    _loadStaff();
+  }
+
+  Future<void> _loadStaff() async {
+    final authState = ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+    
+    if (businessId == null) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _staff = [];
+        });
+      }
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    try {
+      final entityService = ref.read(entityServiceProvider(businessId));
+      final staff = await entityService.get('staff');
+      
+      if (mounted) {
+        setState(() {
+          _staff = staff;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _staff = [];
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final editMode = ref.watch(editModeProvider);
+    
+    // Get staff label from blueprint
+    final labelMappings = ref.watch(labelMappingsProvider);
+    final staffLabel = (labelMappings['staff'] as String?) ?? 'Staff';
+
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
 
     return Column(
       children: [
@@ -71,7 +97,7 @@ class _StaffTabState extends ConsumerState<StaffTab> {
                 ElevatedButton.icon(
                   onPressed: () => _showAddStaffDialog(context),
                   icon: const Icon(Icons.add, size: 20),
-                  label: const Text('Add Staff'),
+                  label: Text('Add $staffLabel'),
                 ),
               ],
             ),
@@ -90,14 +116,18 @@ class _StaffTabState extends ConsumerState<StaffTab> {
               itemCount: _staff.length,
               itemBuilder: (context, index) {
                 final member = _staff[index];
+                final memberRole = member['role'] as String? ?? '';
+                final isOwner = memberRole.toLowerCase() == 'owner';
+                
                 return _StaffCard(
                   staffId: member['id'] as String,
-                  name: member['name'] as String,
-                  role: member['role'] as String,
-                  isActive: member['isActive'] as bool,
+                  name: member['full_name'] as String? ?? member['name'] as String? ?? '',
+                  role: memberRole.isNotEmpty ? memberRole : 'staff',
+                  isActive: member['isActive'] as bool? ?? member['is_active'] as bool? ?? true,
                   avatarUrl: member['avatar'] as String?,
-                  onEdit: editMode ? () => _showEditStaffDialog(context, member) : null,
-                  onDelete: editMode ? () => _showDeleteStaffDialog(context, member) : null,
+                  // Edit button commented out for now
+                  onEdit: null, // editMode ? () => _showEditStaffDialog(context, member) : null,
+                  onDelete: editMode && !isOwner ? () => _showDeleteStaffDialog(context, member) : null,
                   onTap: () {
                     // Select ticket for this staff member
                     ref.read(posProvider.notifier).selectTicketByStaff(member['id'] as String);
@@ -111,55 +141,124 @@ class _StaffTabState extends ConsumerState<StaffTab> {
     );
   }
 
-  void _showAddStaffDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => _StaffDialog(
-        onSave: (staff) {
-          setState(() {
-            _staff.add(staff);
-          });
-          Navigator.of(context).pop();
-        },
-      ),
-    );
-  }
+  void _showAddStaffDialog(BuildContext context) async {
+    final authState = ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+    if (businessId == null) return;
 
-  void _showEditStaffDialog(BuildContext context, Map<String, dynamic> staff) {
+    final labelMappings = ref.read(labelMappingsProvider);
+    final staffLabel = (labelMappings['staff'] as String?) ?? 'Staff';
+    final blueprint = ref.read(currentBlueprintProvider);
+
     showDialog(
       context: context,
       builder: (context) => _StaffDialog(
-        staff: staff,
-        onSave: (updatedStaff) {
-          setState(() {
-            final index = _staff.indexWhere((s) => s['id'] == staff['id']);
-            if (index != -1) {
-              _staff[index] = updatedStaff;
+        staffLabel: staffLabel,
+        businessId: businessId,
+        blueprint: blueprint,
+        onSave: (userRole) async {
+          try {
+            // Refresh staff list after adding
+            await _loadStaff();
+            if (mounted) {
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Staff member added successfully')),
+              );
             }
-          });
-          Navigator.of(context).pop();
+          } catch (e) {
+            if (mounted) {
+              showErrorSnackBar(context, 'Failed to add staff: $e');
+            }
+          }
         },
       ),
     );
   }
 
-  void _showDeleteStaffDialog(BuildContext context, Map<String, dynamic> staff) {
+  void _showEditStaffDialog(BuildContext context, Map<String, dynamic> staff) async {
+    final authState = ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+    if (businessId == null) return;
+
+    final labelMappings = ref.read(labelMappingsProvider);
+    final staffLabel = (labelMappings['staff'] as String?) ?? 'Staff';
+    final blueprint = ref.read(currentBlueprintProvider);
+
+    showDialog(
+      context: context,
+      builder: (context) => _StaffDialog(
+        staffLabel: staffLabel,
+        staff: staff,
+        businessId: businessId,
+        blueprint: blueprint,
+        onSave: (userRole) async {
+          try {
+            // Refresh staff list after updating
+            await _loadStaff();
+            if (mounted) {
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Staff member updated successfully')),
+              );
+            }
+          } catch (e) {
+            if (mounted) {
+              showErrorSnackBar(context, 'Failed to update staff: $e');
+            }
+          }
+        },
+      ),
+    );
+  }
+
+  void _showDeleteStaffDialog(BuildContext context, Map<String, dynamic> staff) async {
+    final authState = ref.read(authProvider);
+    final businessId = authState.currentBusinessId;
+    if (businessId == null) return;
+
+    // Check if user is owner - prevent deletion
+    final role = staff['role'] as String? ?? '';
+    if (role.toLowerCase() == 'owner') {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Cannot delete owner. Owner role cannot be removed.'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Staff'),
-        content: Text('Are you sure you want to delete "${staff['name']}"?'),
+        content: Text('Are you sure you want to delete "${staff['full_name'] ?? staff['name'] ?? 'this staff member'}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              setState(() {
-                _staff.removeWhere((s) => s['id'] == staff['id']);
-              });
-              Navigator.of(context).pop();
+            onPressed: () async {
+              try {
+                final entityService = ref.read(entityServiceProvider(businessId));
+                await entityService.delete('staff', staff['id'] as String);
+                if (mounted) {
+                  setState(() {
+                    _staff.removeWhere((s) => s['id'] == staff['id']);
+                  });
+                  Navigator.of(context).pop();
+                }
+              } catch (e) {
+                if (mounted) {
+                  Navigator.of(context).pop();
+                  showErrorSnackBar(context, 'Failed to delete staff: $e');
+                }
+              }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),
@@ -397,47 +496,79 @@ class _StaffCard extends StatelessWidget {
 }
 
 /// Dialog for adding/editing staff
-class _StaffDialog extends StatefulWidget {
+class _StaffDialog extends ConsumerStatefulWidget {
+  final String staffLabel;
   final Map<String, dynamic>? staff;
-  final Function(Map<String, dynamic>) onSave;
+  final String businessId;
+  final Blueprint? blueprint;
+  final Function(UserBusinessRole) onSave;
 
   const _StaffDialog({
+    required this.staffLabel,
     this.staff,
+    required this.businessId,
+    this.blueprint,
     required this.onSave,
   });
 
   @override
-  State<_StaffDialog> createState() => _StaffDialogState();
+  ConsumerState<_StaffDialog> createState() => _StaffDialogState();
 }
 
-class _StaffDialogState extends State<_StaffDialog> {
+class _StaffDialogState extends ConsumerState<_StaffDialog> {
   final _formKey = GlobalKey<FormState>();
   final _imagePicker = ImagePicker();
   late TextEditingController _nameController;
-  late TextEditingController _roleController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
+  late TextEditingController _passwordController;
+  late TextEditingController _reenterPasswordController;
+  String? _selectedRole;
   bool _isActive = true;
   File? _selectedAvatar;
   String? _avatarUrl; // For existing avatar URL
+  bool _isLoading = false;
+  String? _errorMessage; // For sticky error display
+
+  List<String> get _availableRoles {
+    if (widget.blueprint?.permissions == null) {
+      return ['server', 'manager', 'cashier']; // Default roles
+    }
+    
+    final permissions = widget.blueprint!.permissions as Map<String, dynamic>?;
+    if (permissions == null) {
+      return ['server', 'manager', 'cashier'];
+    }
+    
+    // Extract role names from permissions map
+    return permissions.keys.toList()..remove('owner'); // Exclude owner role
+  }
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.staff?['name'] ?? '');
-    _roleController = TextEditingController(text: widget.staff?['role'] ?? '');
     _emailController = TextEditingController(text: widget.staff?['email'] ?? '');
     _phoneController = TextEditingController(text: widget.staff?['phone'] ?? '');
+    _passwordController = TextEditingController();
+    _reenterPasswordController = TextEditingController();
+    _selectedRole = widget.staff?['role'] as String?;
     _isActive = widget.staff?['isActive'] ?? true;
     _avatarUrl = widget.staff?['avatar'] as String?;
+    
+    // Set default role if available
+    if (_selectedRole == null && _availableRoles.isNotEmpty) {
+      _selectedRole = _availableRoles.first;
+    }
   }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _roleController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
+    _passwordController.dispose();
+    _reenterPasswordController.dispose();
     super.dispose();
   }
 
@@ -457,9 +588,9 @@ class _StaffDialogState extends State<_StaffDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error picking image: $e')),
-        );
+        setState(() {
+          _errorMessage = 'Error picking image: $e';
+        });
       }
     }
   }
@@ -474,6 +605,49 @@ class _StaffDialogState extends State<_StaffDialog> {
     return existingPhone == null || existingPhone.isEmpty;
   }
 
+  Future<void> _assignBusinessRole() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final userService = ref.read(userServiceProvider);
+      final entityService = ref.read(entityServiceProvider(widget.businessId));
+      
+      final request = AssignBusinessRoleRequest(
+        fullName: _nameController.text,
+        email: _emailController.text,
+        phoneNumber: _phoneController.text,
+        role: _selectedRole!,
+        password: _passwordController.text.isNotEmpty ? _passwordController.text : null,
+      );
+
+      // assignBusinessRole now uses EntityService - saves locally first, queues for sync
+      // The queue will call StaffRemoteRepository.create() which calls assignBusinessRole API
+      final userRole = await userService.assignBusinessRole(
+        widget.businessId,
+        request,
+        entityService,
+      );
+
+      if (mounted) {
+        widget.onSave(userRole);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Failed to add staff: $e';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEdit = widget.staff != null;
@@ -481,18 +655,18 @@ class _StaffDialogState extends State<_StaffDialog> {
     return Dialog(
       child: Container(
         width: 500,
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        constraints: const BoxConstraints(maxHeight: 800),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Fixed header
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    isEdit ? 'Edit Staff' : 'Add Staff',
+                    isEdit ? 'Edit ${widget.staffLabel}' : 'Add ${widget.staffLabel}',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -504,6 +678,17 @@ class _StaffDialogState extends State<_StaffDialog> {
                   ),
                 ],
               ),
+            ),
+            // Scrollable form content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
               const SizedBox(height: 24),
               // Avatar upload section
               Center(
@@ -588,16 +773,27 @@ class _StaffDialogState extends State<_StaffDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              // Role field
-              TextFormField(
-                controller: _roleController,
+              // Role dropdown
+              DropdownButtonFormField<String>(
+                value: _selectedRole,
                 decoration: const InputDecoration(
                   labelText: 'Role *',
                   border: OutlineInputBorder(),
                 ),
+                items: _availableRoles.map((role) {
+                  return DropdownMenuItem<String>(
+                    value: role,
+                    child: Text(role[0].toUpperCase() + role.substring(1)), // Capitalize first letter
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedRole = value;
+                  });
+                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a role';
+                    return 'Please select a role';
                   }
                   return null;
                 },
@@ -606,85 +802,224 @@ class _StaffDialogState extends State<_StaffDialog> {
               // Email field
               TextFormField(
                 controller: _emailController,
-                enabled: _canEditEmail,
+                enabled: widget.staff == null, // Only editable when adding new staff
                 decoration: InputDecoration(
-                  labelText: 'Email',
+                  labelText: 'Email *',
                   border: const OutlineInputBorder(),
                   helperText: widget.staff != null && !_canEditEmail 
                       ? 'Email cannot be changed once set' 
                       : null,
                 ),
                 keyboardType: TextInputType.emailAddress,
-                readOnly: !_canEditEmail,
+                readOnly: widget.staff != null,
+                validator: widget.staff == null ? (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an email address';
+                  }
+                  if (!value.contains('@')) {
+                    return 'Please enter a valid email address';
+                  }
+                  return null;
+                } : null,
               ),
               const SizedBox(height: 16),
               // Phone field
               TextFormField(
                 controller: _phoneController,
-                enabled: _canEditPhone,
+                enabled: widget.staff == null, // Only editable when adding new staff
                 decoration: InputDecoration(
-                  labelText: 'Phone Number',
+                  labelText: 'Phone Number *',
                   border: const OutlineInputBorder(),
                   helperText: widget.staff != null && !_canEditPhone 
                       ? 'Phone cannot be changed once set' 
                       : null,
                 ),
                 keyboardType: TextInputType.phone,
-                readOnly: !_canEditPhone,
-              ),
-              const SizedBox(height: 16),
-              // Active status
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Active Status'),
-                  Switch(
-                    value: _isActive,
-                    onChanged: (value) {
-                      setState(() {
-                        _isActive = value;
-                      });
-                    },
-                  ),
-                ],
+                readOnly: widget.staff != null,
+                validator: widget.staff == null ? (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a phone number';
+                  }
+                  return null;
+                } : null,
               ),
               const SizedBox(height: 24),
-              // Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
+              // Password fields (for new users)
+              if (widget.staff == null) ...[
+                // Password field
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Password (Optional)',
+                    border: OutlineInputBorder(),
+                    helperText: 'New users only - leave empty if user exists',
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        final staff = {
-                          'id': widget.staff?['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
-                          'name': _nameController.text,
-                          'role': _roleController.text,
-                          'email': _emailController.text.isNotEmpty 
-                              ? _emailController.text 
-                              : widget.staff?['email'],
-                          'phone': _phoneController.text.isNotEmpty 
-                              ? _phoneController.text 
-                              : widget.staff?['phone'],
-                          'isActive': _isActive,
-                          'avatar': _selectedAvatar != null 
-                              ? _selectedAvatar!.path // In real app, upload to server and get URL
-                              : _avatarUrl,
-                        };
-                        widget.onSave(staff);
+                  obscureText: true,
+                ),
+                const SizedBox(height: 16),
+                // Re-enter password field
+                TextFormField(
+                  controller: _reenterPasswordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Re-enter Password',
+                    border: OutlineInputBorder(),
+                    helperText: 'Required if password is provided',
+                  ),
+                  obscureText: true,
+                  validator: (value) {
+                    if (_passwordController.text.isNotEmpty) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please re-enter the password';
                       }
-                    },
-                    child: Text(isEdit ? 'Save' : 'Add'),
+                      if (value != _passwordController.text) {
+                        return 'Passwords do not match';
+                      }
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
+              // Active status (only for edit mode)
+              if (widget.staff != null) ...[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Active Status'),
+                    Switch(
+                      value: _isActive,
+                      onChanged: (value) {
+                        setState(() {
+                          _isActive = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
+              const SizedBox(height: 24),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ],
-          ),
+            ),
+            // Fixed buttons with overlay error message
+            Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+                        child: const Text('Cancel'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: _isLoading ? null : () async {
+                          // Clear any previous error
+                          setState(() {
+                            _errorMessage = null;
+                          });
+                          
+                          if (_formKey.currentState!.validate()) {
+                            if (widget.staff == null) {
+                              // Add new staff - call assign business role
+                              await _assignBusinessRole();
+                            } else {
+                              // Edit existing staff - use old logic (for now)
+                              final staff = {
+                                'id': widget.staff!['id'],
+                                'name': _nameController.text,
+                                'role': _selectedRole,
+                                'email': _emailController.text.isNotEmpty 
+                                    ? _emailController.text 
+                                    : widget.staff?['email'],
+                                'phone': _phoneController.text.isNotEmpty 
+                                    ? _phoneController.text 
+                                    : widget.staff?['phone'],
+                                'isActive': _isActive,
+                                'avatar': _selectedAvatar != null 
+                                    ? _selectedAvatar!.path
+                                    : _avatarUrl,
+                              };
+                              // TODO: Update edit logic to use update user endpoint
+                              widget.onSave(UserBusinessRole(
+                                id: staff['id'] as String,
+                                userId: staff['id'] as String,
+                                businessId: widget.businessId,
+                                role: staff['role'] as String,
+                                isActive: staff['isActive'] as bool,
+                                createdAt: DateTime.now(),
+                                updatedAt: DateTime.now(),
+                              ));
+                            }
+                          }
+                        },
+                        child: _isLoading 
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Text(widget.staff == null ? 'Add' : 'Save'),
+                      ),
+                    ],
+                  ),
+                ),
+                // Overlay error message at bottom
+                if (_errorMessage != null)
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        border: Border(
+                          top: BorderSide(color: Colors.red.shade200, width: 1),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, -2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: TextStyle(
+                                color: Colors.red.shade700,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, size: 18),
+                            color: Colors.red.shade700,
+                            onPressed: () {
+                              setState(() {
+                                _errorMessage = null;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ),
       ),
     );

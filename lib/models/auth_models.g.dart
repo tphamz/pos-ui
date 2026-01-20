@@ -89,7 +89,7 @@ _$SignUpRequestImpl _$$SignUpRequestImplFromJson(Map<String, dynamic> json) =>
       email: json['email'] as String?,
       password: json['password'] as String?,
       businessName: json['business_name'] as String,
-      blueprintId: json['blueprint_id'] as String?,
+      blueprintId: json['blueprint_id'] as String,
     );
 
 Map<String, dynamic> _$$SignUpRequestImplToJson(_$SignUpRequestImpl instance) =>
@@ -166,6 +166,7 @@ _$UserImpl _$$UserImplFromJson(Map<String, dynamic> json) => _$UserImpl(
   phoneNumber: json['phone_number'] as String?,
   email: json['email'] as String?,
   isVerified: json['is_verified'] as bool,
+  version: (json['version'] as num?)?.toInt() ?? 1,
   createdAt: DateTime.parse(json['created_at'] as String),
 );
 
@@ -176,34 +177,64 @@ Map<String, dynamic> _$$UserImplToJson(_$UserImpl instance) =>
       'phone_number': instance.phoneNumber,
       'email': instance.email,
       'is_verified': instance.isVerified,
+      'version': instance.version,
       'created_at': instance.createdAt.toIso8601String(),
     };
 
-_$SignUpResponseImpl _$$SignUpResponseImplFromJson(Map<String, dynamic> json) {
-  // Validate user field
-  final userData = json['user'];
-  if (userData == null) {
-    throw ArgumentError('user field is required in SignUpResponse');
-  }
-  if (userData is! Map<String, dynamic>) {
-    throw ArgumentError('user field must be a Map, got ${userData.runtimeType}');
-  }
-  
-  // Validate business field
-  final businessData = json['business'];
-  if (businessData == null) {
-    throw ArgumentError('business field is required in SignUpResponse');
-  }
-  if (businessData is! Map<String, dynamic>) {
-    throw ArgumentError('business field must be a Map, got ${businessData.runtimeType}');
-  }
-  
-  return _$SignUpResponseImpl(
-    user: User.fromJson(userData),
-    business: Business.fromJson(businessData),
-  );
-}
+_$SignUpResponseImpl _$$SignUpResponseImplFromJson(Map<String, dynamic> json) =>
+    _$SignUpResponseImpl(
+      user: User.fromJson(json['user'] as Map<String, dynamic>),
+      business: Business.fromJson(json['business'] as Map<String, dynamic>),
+    );
 
 Map<String, dynamic> _$$SignUpResponseImplToJson(
   _$SignUpResponseImpl instance,
 ) => <String, dynamic>{'user': instance.user, 'business': instance.business};
+
+_$AssignBusinessRoleRequestImpl _$$AssignBusinessRoleRequestImplFromJson(
+  Map<String, dynamic> json,
+) => _$AssignBusinessRoleRequestImpl(
+  fullName: json['full_name'] as String,
+  email: json['email'] as String,
+  phoneNumber: json['phone_number'] as String,
+  role: json['role'] as String,
+  password: json['password'] as String?,
+  terminalPin: json['terminal_pin'] as String?,
+);
+
+Map<String, dynamic> _$$AssignBusinessRoleRequestImplToJson(
+  _$AssignBusinessRoleRequestImpl instance,
+) => <String, dynamic>{
+  'full_name': instance.fullName,
+  'email': instance.email,
+  'phone_number': instance.phoneNumber,
+  'role': instance.role,
+  'password': instance.password,
+  'terminal_pin': instance.terminalPin,
+};
+
+_$UserBusinessRoleImpl _$$UserBusinessRoleImplFromJson(
+  Map<String, dynamic> json,
+) => _$UserBusinessRoleImpl(
+  id: json['id'] as String,
+  userId: json['user_id'] as String,
+  businessId: json['business_id'] as String,
+  role: json['role'] as String,
+  terminalPin: json['terminal_pin'] as String?,
+  isActive: json['is_active'] as bool,
+  createdAt: DateTime.parse(json['created_at'] as String),
+  updatedAt: DateTime.parse(json['updated_at'] as String),
+);
+
+Map<String, dynamic> _$$UserBusinessRoleImplToJson(
+  _$UserBusinessRoleImpl instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'user_id': instance.userId,
+  'business_id': instance.businessId,
+  'role': instance.role,
+  'terminal_pin': instance.terminalPin,
+  'is_active': instance.isActive,
+  'created_at': instance.createdAt.toIso8601String(),
+  'updated_at': instance.updatedAt.toIso8601String(),
+};

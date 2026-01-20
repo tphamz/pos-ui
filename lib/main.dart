@@ -8,16 +8,13 @@ import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
 import 'widgets/global_app_bar.dart';
 import 'theme/pos_theme.dart';
+import 'services/sync_manager.dart';
 
 void main() async {
   // Load environment variables from .env file
   await dotenv.load(fileName: '.env');
-  
-  runApp(
-    const ProviderScope(
-      child: POSApp(),
-    ),
-  );
+
+  runApp(const ProviderScope(child: POSApp()));
 }
 
 class POSApp extends ConsumerStatefulWidget {
@@ -27,8 +24,43 @@ class POSApp extends ConsumerStatefulWidget {
   ConsumerState<POSApp> createState() => _POSAppState();
 }
 
-class _POSAppState extends ConsumerState<POSApp> {
+class _POSAppState extends ConsumerState<POSApp> with WidgetsBindingObserver {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    // Initialize sync manager when app starts
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(syncManagerProvider); // Initialize sync manager
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // When app resumes/comes to foreground, only push local changes (don't pull)
+    // This prevents unnecessary API calls while still syncing pending changes
+    if (state == AppLifecycleState.resumed) {
+      final authState = ref.read(authProvider);
+      // Only sync if user is authenticated (not on login screen)
+      if (authState.isAuthenticated) {
+        final syncManager = ref.read(syncManagerProvider);
+        // Only push local changes to server, don't pull from server
+        // This is more efficient for offline-first architecture
+        syncManager.pushLocalChanges(); // Non-blocking
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +100,8 @@ class _POSAppState extends ConsumerState<POSApp> {
       },
       onGenerateRoute: (settings) {
         // Handle routes that need auth state
-        if ((settings.name == '/home' || settings.name == '/pos') && !authState.isAuthenticated) {
+        if ((settings.name == '/home' || settings.name == '/pos') &&
+            !authState.isAuthenticated) {
           return MaterialPageRoute(builder: (_) => const LoginScreen());
         }
         if (settings.name == '/login' && authState.isAuthenticated) {
@@ -80,15 +113,12 @@ class _POSAppState extends ConsumerState<POSApp> {
         // Only show GlobalAppBar on non-POS screens
         final route = ModalRoute.of(context);
         final isPOSScreen = route?.settings.name == '/pos';
-        
+
         if (isPOSScreen) {
           return child!;
         }
-        
-        return Scaffold(
-          appBar: const GlobalAppBar(),
-          body: child!,
-        );
+
+        return Scaffold(appBar: const GlobalAppBar(), body: child!);
       },
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/api_providers.dart';
 import '../models/auth_models.dart';
+import '../models/blueprint_models.dart';
 import '../utils/validation.dart';
 import 'login_screen.dart';
 
@@ -24,6 +25,15 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   bool _isConfirmPasswordVisible = false;
   bool _isLoading = false;
   String? _error;
+  String? _selectedBlueprintId;
+  List<BlueprintListItem> _blueprints = [];
+  bool _isLoadingBlueprints = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBlueprints();
+  }
 
   @override
   void dispose() {
@@ -34,6 +44,34 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadBlueprints() async {
+    setState(() {
+      _isLoadingBlueprints = true;
+    });
+
+    try {
+      final blueprintService = ref.read(blueprintServiceProvider);
+      final blueprints = await blueprintService.getBlueprints();
+      if (mounted) {
+        setState(() {
+          _blueprints = blueprints;
+          _isLoadingBlueprints = false;
+          // Auto-select first blueprint if available
+          if (_blueprints.isNotEmpty && _selectedBlueprintId == null) {
+            _selectedBlueprintId = _blueprints.first.id;
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingBlueprints = false;
+          _error = 'Failed to load business types: $e';
+        });
+      }
+    }
   }
 
   Future<void> _handleSignup() async {
@@ -66,12 +104,22 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           ? ValidationUtils.normalizePhoneNumber(phoneNumberRaw)
           : null;
 
+      // Validate blueprint selection
+      if (_selectedBlueprintId == null || _selectedBlueprintId!.isEmpty) {
+        setState(() {
+          _error = 'Please select a business type';
+          _isLoading = false;
+        });
+        return;
+      }
+
       final request = SignUpRequest(
         fullName: _fullNameController.text.trim(),
         businessName: _businessNameController.text.trim(),
         email: email,
         phoneNumber: phoneNumber,
         password: _passwordController.text,
+        blueprintId: _selectedBlueprintId!,
       );
 
       final userService = ref.read(userServiceProvider);
@@ -136,6 +184,61 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 48),
+
+                    // Business Type Selection (Dropdown)
+                    if (_isLoadingBlueprints)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    else if (_blueprints.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.errorContainer.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.error.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Text(
+                          'No business types available. Please try again later.',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    else
+                      DropdownButtonFormField<String>(
+                        value: _selectedBlueprintId,
+                        decoration: const InputDecoration(
+                          labelText: 'Business Type *',
+                          hintText: 'Select a business type',
+                          prefixIcon: Icon(Icons.business_outlined),
+                          border: OutlineInputBorder(),
+                        ),
+                        items: _blueprints.map((blueprint) {
+                          return DropdownMenuItem<String>(
+                            value: blueprint.id,
+                            child: Text(blueprint.name),
+                          );
+                        }).toList(),
+                        onChanged: (String? value) {
+                          setState(() {
+                            _selectedBlueprintId = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please select a business type';
+                          }
+                          return null;
+                        },
+                      ),
+                    const SizedBox(height: 16),
 
                     // Full Name field
                     TextFormField(

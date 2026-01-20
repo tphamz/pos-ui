@@ -9,37 +9,39 @@ part of 'product_models.dart';
 _$ProductImpl _$$ProductImplFromJson(Map<String, dynamic> json) =>
     _$ProductImpl(
       id: json['id'] as String,
-      businessId: json['businessId'] as String,
-      categoryId: json['categoryId'] as String?,
+      businessId: json['business_id'] as String,
+      categoryId: json['category'] as String?,
       name: json['name'] as String,
       sku: json['sku'] as String?,
-      basePrice: (json['basePrice'] as num).toDouble(),
-      taxRate: (json['taxRate'] as num).toDouble(),
+      basePrice: (json['base_price'] as num).toDouble(),
+      taxRate: (json['tax_rate'] as num).toDouble(),
       metadata: json['metadata'] as Map<String, dynamic>?,
-      isActive: json['isActive'] as bool,
-      stockQuantity: (json['stockQuantity'] as num).toInt(),
-      createdAt: json['createdAt'] == null
+      isActive: json['is_active'] as bool,
+      stockQuantity: (json['stock_quantity'] as num).toInt(),
+      version: (json['version'] as num?)?.toInt() ?? 1,
+      createdAt: json['created_at'] == null
           ? null
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
+          : DateTime.parse(json['created_at'] as String),
+      updatedAt: json['updated_at'] == null
           ? null
-          : DateTime.parse(json['updatedAt'] as String),
+          : DateTime.parse(json['updated_at'] as String),
     );
 
 Map<String, dynamic> _$$ProductImplToJson(_$ProductImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'businessId': instance.businessId,
-      'categoryId': instance.categoryId,
+      'business_id': instance.businessId,
+      'category': instance.categoryId,
       'name': instance.name,
       'sku': instance.sku,
-      'basePrice': instance.basePrice,
-      'taxRate': instance.taxRate,
+      'base_price': instance.basePrice,
+      'tax_rate': instance.taxRate,
       'metadata': instance.metadata,
-      'isActive': instance.isActive,
-      'stockQuantity': instance.stockQuantity,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
+      'is_active': instance.isActive,
+      'stock_quantity': instance.stockQuantity,
+      'version': instance.version,
+      'created_at': instance.createdAt?.toIso8601String(),
+      'updated_at': instance.updatedAt?.toIso8601String(),
     };
 
 _$CategoryImpl _$$CategoryImplFromJson(Map<String, dynamic> json) =>
@@ -107,6 +109,7 @@ _$UpdateProductRequestImpl _$$UpdateProductRequestImplFromJson(
   metadata: json['metadata'] as Map<String, dynamic>?,
   isActive: json['isActive'] as bool?,
   stockQuantity: (json['stockQuantity'] as num?)?.toInt(),
+  version: (json['version'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$$UpdateProductRequestImplToJson(
@@ -120,6 +123,7 @@ Map<String, dynamic> _$$UpdateProductRequestImplToJson(
   'metadata': instance.metadata,
   'isActive': instance.isActive,
   'stockQuantity': instance.stockQuantity,
+  'version': instance.version,
 };
 
 _$CreateCategoryRequestImpl _$$CreateCategoryRequestImplFromJson(

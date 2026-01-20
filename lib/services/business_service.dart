@@ -18,11 +18,11 @@ class BusinessService {
     }
   }
 
-  // Get business by ID
-  Future<Business> getBusiness(String id) async {
+  // Get business by ID (returns BusinessDetailResponse with blueprint and config)
+  Future<BusinessDetailResponse> getBusiness(String id) async {
     try {
       final response = await _apiClient.dio.get('/businesses/$id');
-      return Business.fromJson(response.data);
+      return BusinessDetailResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw _handleError(e);
     }
@@ -52,6 +52,32 @@ class BusinessService {
         data: request.toJson(),
       );
       return Business.fromJson(response.data);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  // Get business configuration
+  Future<BusinessConfig> getBusinessConfig(String businessId) async {
+    try {
+      final response = await _apiClient.dio.get('/businesses/$businessId/config');
+      return BusinessConfig.fromJson(response.data);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  // Update business configuration
+  Future<BusinessConfig> updateBusinessConfig(
+    String businessId,
+    UpdateBusinessConfigRequest request,
+  ) async {
+    try {
+      final response = await _apiClient.dio.put(
+        '/businesses/$businessId/config',
+        data: request.toJson(),
+      );
+      return BusinessConfig.fromJson(response.data);
     } on DioException catch (e) {
       throw _handleError(e);
     }

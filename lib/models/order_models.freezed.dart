@@ -35,6 +35,8 @@ mixin _$Order {
   String? get notes => throw _privateConstructorUsedError;
   List<OrderItem> get items => throw _privateConstructorUsedError;
   List<Payment>? get payments => throw _privateConstructorUsedError;
+  int get version =>
+      throw _privateConstructorUsedError; // Optimistic locking version
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
   DateTime? get completedAt => throw _privateConstructorUsedError;
@@ -67,6 +69,7 @@ abstract class $OrderCopyWith<$Res> {
     String? notes,
     List<OrderItem> items,
     List<Payment>? payments,
+    int version,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? completedAt,
@@ -101,6 +104,7 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
     Object? notes = freezed,
     Object? items = null,
     Object? payments = freezed,
+    Object? version = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
     Object? completedAt = freezed,
@@ -159,6 +163,10 @@ class _$OrderCopyWithImpl<$Res, $Val extends Order>
                 ? _value.payments
                 : payments // ignore: cast_nullable_to_non_nullable
                       as List<Payment>?,
+            version: null == version
+                ? _value.version
+                : version // ignore: cast_nullable_to_non_nullable
+                      as int,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -199,6 +207,7 @@ abstract class _$$OrderImplCopyWith<$Res> implements $OrderCopyWith<$Res> {
     String? notes,
     List<OrderItem> items,
     List<Payment>? payments,
+    int version,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? completedAt,
@@ -232,6 +241,7 @@ class __$$OrderImplCopyWithImpl<$Res>
     Object? notes = freezed,
     Object? items = null,
     Object? payments = freezed,
+    Object? version = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
     Object? completedAt = freezed,
@@ -290,6 +300,10 @@ class __$$OrderImplCopyWithImpl<$Res>
             ? _value._payments
             : payments // ignore: cast_nullable_to_non_nullable
                   as List<Payment>?,
+        version: null == version
+            ? _value.version
+            : version // ignore: cast_nullable_to_non_nullable
+                  as int,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -324,6 +338,7 @@ class _$OrderImpl implements _Order {
     this.notes,
     required final List<OrderItem> items,
     final List<Payment>? payments,
+    this.version = 1,
     this.createdAt,
     this.updatedAt,
     this.completedAt,
@@ -384,6 +399,10 @@ class _$OrderImpl implements _Order {
   }
 
   @override
+  @JsonKey()
+  final int version;
+  // Optimistic locking version
+  @override
   final DateTime? createdAt;
   @override
   final DateTime? updatedAt;
@@ -392,7 +411,7 @@ class _$OrderImpl implements _Order {
 
   @override
   String toString() {
-    return 'Order(id: $id, businessId: $businessId, createdByUserId: $createdByUserId, createdByRoleId: $createdByRoleId, status: $status, subtotal: $subtotal, taxAmount: $taxAmount, totalAmount: $totalAmount, paidAmount: $paidAmount, metadata: $metadata, notes: $notes, items: $items, payments: $payments, createdAt: $createdAt, updatedAt: $updatedAt, completedAt: $completedAt)';
+    return 'Order(id: $id, businessId: $businessId, createdByUserId: $createdByUserId, createdByRoleId: $createdByRoleId, status: $status, subtotal: $subtotal, taxAmount: $taxAmount, totalAmount: $totalAmount, paidAmount: $paidAmount, metadata: $metadata, notes: $notes, items: $items, payments: $payments, version: $version, createdAt: $createdAt, updatedAt: $updatedAt, completedAt: $completedAt)';
   }
 
   @override
@@ -420,6 +439,7 @@ class _$OrderImpl implements _Order {
             (identical(other.notes, notes) || other.notes == notes) &&
             const DeepCollectionEquality().equals(other._items, _items) &&
             const DeepCollectionEquality().equals(other._payments, _payments) &&
+            (identical(other.version, version) || other.version == version) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -445,6 +465,7 @@ class _$OrderImpl implements _Order {
     notes,
     const DeepCollectionEquality().hash(_items),
     const DeepCollectionEquality().hash(_payments),
+    version,
     createdAt,
     updatedAt,
     completedAt,
@@ -479,6 +500,7 @@ abstract class _Order implements Order {
     final String? notes,
     required final List<OrderItem> items,
     final List<Payment>? payments,
+    final int version,
     final DateTime? createdAt,
     final DateTime? updatedAt,
     final DateTime? completedAt,
@@ -512,6 +534,8 @@ abstract class _Order implements Order {
   List<OrderItem> get items;
   @override
   List<Payment>? get payments;
+  @override
+  int get version; // Optimistic locking version
   @override
   DateTime? get createdAt;
   @override

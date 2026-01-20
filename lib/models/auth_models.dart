@@ -72,7 +72,7 @@ class SignUpRequest with _$SignUpRequest {
     @JsonKey(name: 'email') String? email,
     @JsonKey(name: 'password') String? password,
     @JsonKey(name: 'business_name') required String businessName,
-    @JsonKey(name: 'blueprint_id') String? blueprintId,
+    @JsonKey(name: 'blueprint_id') required String blueprintId, // Changed from String? to required String
   }) = _SignUpRequest;
 
   factory SignUpRequest.fromJson(Map<String, dynamic> json) =>
@@ -130,6 +130,7 @@ class User with _$User {
     @JsonKey(name: 'phone_number') String? phoneNumber,
     @JsonKey(name: 'email') String? email,
     @JsonKey(name: 'is_verified') required bool isVerified,
+    @Default(1) @JsonKey(name: 'version') int version, // Optimistic locking version
     @JsonKey(name: 'created_at') required DateTime createdAt,
   }) = _User;
 
@@ -146,4 +147,36 @@ class SignUpResponse with _$SignUpResponse {
 
   factory SignUpResponse.fromJson(Map<String, dynamic> json) =>
       _$SignUpResponseFromJson(json);
+}
+
+@freezed
+class AssignBusinessRoleRequest with _$AssignBusinessRoleRequest {
+  const factory AssignBusinessRoleRequest({
+    @JsonKey(name: 'full_name') required String fullName,
+    required String email,
+    @JsonKey(name: 'phone_number') required String phoneNumber,
+    required String role,
+    String? password,
+    @JsonKey(name: 'terminal_pin') String? terminalPin,
+  }) = _AssignBusinessRoleRequest;
+
+  factory AssignBusinessRoleRequest.fromJson(Map<String, dynamic> json) =>
+      _$AssignBusinessRoleRequestFromJson(json);
+}
+
+@freezed
+class UserBusinessRole with _$UserBusinessRole {
+  const factory UserBusinessRole({
+    required String id,
+    @JsonKey(name: 'user_id') required String userId,
+    @JsonKey(name: 'business_id') required String businessId,
+    required String role,
+    @JsonKey(name: 'terminal_pin') String? terminalPin,
+    @JsonKey(name: 'is_active') required bool isActive,
+    @JsonKey(name: 'created_at') required DateTime createdAt,
+    @JsonKey(name: 'updated_at') required DateTime updatedAt,
+  }) = _UserBusinessRole;
+
+  factory UserBusinessRole.fromJson(Map<String, dynamic> json) =>
+      _$UserBusinessRoleFromJson(json);
 }

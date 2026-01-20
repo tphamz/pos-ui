@@ -7,17 +7,18 @@ part 'product_models.g.dart';
 class Product with _$Product {
   const factory Product({
     required String id,
-    required String businessId,
-    String? categoryId,
+    @JsonKey(name: 'business_id') required String businessId,
+    @JsonKey(name: 'category') String? categoryId,
     required String name,
     String? sku,
-    required double basePrice,
-    required double taxRate,
+    @JsonKey(name: 'base_price') required double basePrice,
+    @JsonKey(name: 'tax_rate') required double taxRate,
     Map<String, dynamic>? metadata,
-    required bool isActive,
-    required int stockQuantity,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    @JsonKey(name: 'is_active') required bool isActive,
+    @JsonKey(name: 'stock_quantity') required int stockQuantity,
+    @Default(1) int version, // Optimistic locking version
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+    @JsonKey(name: 'updated_at') DateTime? updatedAt,
   }) = _Product;
 
   factory Product.fromJson(Map<String, dynamic> json) =>
@@ -69,6 +70,7 @@ class UpdateProductRequest with _$UpdateProductRequest {
     Map<String, dynamic>? metadata,
     bool? isActive,
     int? stockQuantity,
+    int? version, // Optional version for optimistic locking
   }) = _UpdateProductRequest;
 
   factory UpdateProductRequest.fromJson(Map<String, dynamic> json) =>

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/pos_theme.dart';
 import '../../providers/pos_provider.dart';
 import '../../models/pos/ticket.dart';
-import 'business_switcher.dart';
+import '../../providers/blueprint_provider.dart';
 
 /// Right side ticket/order panel (320px width)
 class TicketPanel extends ConsumerWidget {
@@ -15,6 +15,13 @@ class TicketPanel extends ConsumerWidget {
     final borderColor = isDark ? const Color(0xFF404040) : const Color(0xFFE6E6E6);
     final posState = ref.watch(posProvider);
     final currentTicket = posState.currentTicket;
+    
+    // Get UI schema and label mappings from blueprint
+    final uiSchema = ref.watch(uiSchemaProvider);
+    final posScreenSchema = uiSchema['pos_screen'] as Map<String, dynamic>?;
+    final showTables = posScreenSchema?['show_tables'] as bool? ?? false;
+    final labelMappings = ref.watch(labelMappingsProvider);
+    final tableLabel = (labelMappings['tables'] as String?) ?? 'Table';
 
     final subtotal = currentTicket?.items.fold<double>(
           0.0,
@@ -282,8 +289,8 @@ class TicketPanel extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  // Table Assignment (show for restaurant only)
-                  if (posState.businessType == BusinessType.restaurant) ...[
+                  // Table Assignment (show based on blueprint UI schema)
+                  if (showTables) ...[
                     const SizedBox(height: 16),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,7 +301,7 @@ class TicketPanel extends ConsumerWidget {
                             const SizedBox(width: 12), // Match spacing
                             Expanded(
                               child: Text(
-                                'Table',
+                                tableLabel,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: isDark 
@@ -351,7 +358,7 @@ class TicketPanel extends ConsumerWidget {
                                       return DropdownMenuItem<String>(
                                         value: table.number,
                                         child: Text(
-                                          'Table ${table.number}',
+                                          '$tableLabel ${table.number}',
                                           style: const TextStyle(fontSize: 14),
                                         ),
                                       );
@@ -515,12 +522,8 @@ class TicketPanel extends ConsumerWidget {
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: ElevatedButton(
+                        child: OutlinedButton(
                           onPressed: () => _showCloseTicketDialog(context, currentTicket!),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                          ),
                           child: const Text('Close'),
                         ),
                       ),

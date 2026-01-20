@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import '../utils/validation.dart';
+import '../utils/snackbar_helper.dart';
 
 class OTPVerificationScreen extends ConsumerStatefulWidget {
   final String contact;
@@ -55,9 +56,7 @@ class _OTPVerificationScreenState
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        showErrorSnackBar(context, e.toString());
       }
     }
   }
@@ -88,9 +87,7 @@ class _OTPVerificationScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        showErrorSnackBar(context, e.toString());
       }
     }
   }
@@ -107,9 +104,7 @@ class _OTPVerificationScreenState
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        showErrorSnackBar(context, e.toString());
       }
     } finally {
       setState(() => _isResending = false);
